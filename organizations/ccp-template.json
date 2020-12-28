@@ -1,0 +1,49 @@
+{
+    "name": "supplychain-network-${ORG}",
+    "version": "1.0.0",
+    "client": {
+        "organization": "${ORGID}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "${ORGID}": {
+            "mspid": "${ORGID}MSP",
+            "peers": [
+                "peer0.${ORG}.hhm-ssc.com"
+            ],
+            "certificateAuthorities": [
+                "ca.${ORG}.hhm-ssc.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.${ORG}.hhm-ssc.com": {
+            "url": "grpcs://localhost:${P0PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.${ORG}.hhm-ssc.com",
+                "hostnameOverride": "peer0.${ORG}.hhm-ssc.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.${ORG}.hhm-ssc.com": {
+            "url": "https://localhost:${CAPORT}",
+            "caName": "ca-${ORG}",
+            "tlsCACerts": {
+                "pem": ["${CAPEM}"]
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}
