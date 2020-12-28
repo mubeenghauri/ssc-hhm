@@ -20,7 +20,7 @@ Supply Chain Network Hyperledger Fabric 2.0
 
 ## Organizations Configurations
 
-   ### Organization Crypto Material Configuration
+   ### Organization Crypto Material Configuration       [DONE]
         - Create crypto configuration file for :
             1. Orderer      [DONE]
                 At organizations/cryptogen/crypto-config-orderer.yaml
@@ -33,17 +33,27 @@ Supply Chain Network Hyperledger Fabric 2.0
    
    ### Organizations Fabric Certificate Athurity Configuration
         - Create certificate authority configurations for :
-            1. Orderer
+            1. Orderer      [DONE]
                 At organizations/fabric-ca/ordererOrg/fabric-ca-server-config.yaml
-            2. Manufacturer
+            2. Manufacturer [DONE]
                 At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
-            3. Supplier
+            3. Supplier     [DONE]
                 At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
-            4. Retailer
+            4. Retailer     [DONE]
                 At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
+   
+   ##### Generate CCP [DONE]
+        - Create CCP script  [DONE]
+            At organization/ccp-generate.sh
+        - Create RegisterUser script at [NO NEED]
+            At organization/fabric-ca/registerEnroll.shs (only needed if $CRYPTO == "Certificate Authorities")
 
 ## Network start up script [DOING]
     - Complete network startup script
+        Functions to implement
+        - networkUp [DONE]
+        - networkUp [DONE]
+        - deployCC
 
 ## Chaincodes
     - Make necessary chaincodes

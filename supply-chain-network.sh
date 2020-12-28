@@ -1,19 +1,53 @@
 #!/bin/bash
 
-#
-# Bash Script to manage our Supply Chain Network
-# 
+#####################################################
+# Bash Script to manage our Supply Chain Network    #
+# @author: mubeenghauri                             #
+#####################################################
 
-
-# prepending $PWD/../bin to PATH to ensure we are picking up the correct binaries
-# this may be commented out to resolve installed version of tools if desired
+###################################################################################
+# prepending $PWD/../bin to PATH to ensure we are picking up the correct binaries #
+# this may be commented out to resolve installed version of tools if desired      #
+###################################################################################
 export PATH=${PWD}/../bin:$PATH
 export FABRIC_CFG_PATH=${PWD}/configtx
 export VERBOSE=false
 
 source scriptUtility.sh
 
-# Create Organization crypto material using cryptogen or CAs
+################################
+# Helper Functions Begin Below #
+################################
+
+########################################################################
+# Obtain CONTAINER_IDS and remove them                                 #
+# TODO Might want to make this optional - could clear other containers #
+# This function is called when you bring a network down                #
+########################################################################
+function clearContainers() {
+  CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /dev-peer.*/) {print $1}')
+  if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
+    infoln "No containers available for deletion"
+  else
+    docker rm -f $CONTAINER_IDS
+  fi
+}
+
+#################################################################
+# Delete any images that were generated as a part of this setup #
+# specifically the following images are often left behind:      #
+# This function is called when you bring the network down       #
+#################################################################
+function removeUnwantedImages() {
+  DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /dev-peer.*/) {print $3}')
+  if [ -z "$DOCKER_IMAGE_IDS" -o "$DOCKER_IMAGE_IDS" == " " ]; then
+    infoln "No images available for deletion"
+  else
+    docker rmi -f $DOCKER_IMAGE_IDS
+  fi
+}
+
+# Create Organization crypto material using cryptogen
 function createOrgs() {
 
   infoln "Creating Peer Orgs and Orderer ...."
@@ -75,51 +109,52 @@ function createOrgs() {
 
   fi
 
-  # Create crypto material using Fabric CAs
-#   if [ "$CRYPTO" == "Certificate Authorities" ]; then
+  infoln "Generate CCP files for Manufacturer, Supplier and Retailer"
+  ./organizations/ccp-generate.sh
+}
 
-#     infoln "Generate certificates using Fabric CA's"
 
-#     IMAGE_TAG=${CA_IMAGETAG} docker-compose -f $COMPOSE_FILE_CA up -d 2>&1
+# Generate orderer system channel genesis block.
+function createConsortium() {
 
-#     . organizations/fabric-ca/registerEnroll.sh
+  which configtxgen
+  if [ "$?" -ne 0 ]; then
+    fatalln "configtxgen tool not found."
+  fi
 
-#   while :
-#     do
-#       if [ ! -f "organizations/fabric-ca/org1/tls-cert.pem" ]; then
-#         sleep 1
-#       else
-#         break
-#       fi
-#     done
+  infoln "Generating Orderer Genesis block"
 
-#     infoln "Create Org1 Identities"
-
-#     createOrg1
-
-#     infoln "Create Org2 Identities"
-
-#     createOrg2
-
-#     infoln "Create Orderer Org Identities"
-
-#     createOrderer
-
-#   fi
-
-#   infoln "Generate CCP files for Org1 and Org2"
-#   ./organizations/ccp-generate.sh
+  # Note: For some unknown reason (at least for now) the block file can't be
+  # named orderer.genesis.block or the orderer will fail to launch!
+  set -x
+  configtxgen -profile SupplyChainNetworkOrdererGenesis -channelID system-channel -outputBlock ./system-genesis-block/genesis.block
+  res=$?
+  { set +x; } 2>/dev/null
+  if [ $res -ne 0 ]; then
+    fatalln "Failed to generate orderer genesis block..."
+  fi
 }
 
 
 # Bring up Peer and Orderer Nodes using Docker Compose
 function networkUp() {
 
-    if [ ! -d "organizations/peerOrganizations" ]; then
-        createOrgs
-    else
-        warnln "Something went wrong in bringing network up"
-    fi
+  if [ ! -d "organizations/peerOrganizations" ]; then
+    createOrgs
+    createConsortium
+  else
+    warnln "organizations/peerOrganizations already exist !!! It shouldnt for development, LOOK INTO IT !!"
+  fi
+
+  COMPOSE_FILES="-f ${COMPOSE_FILE_BASE}"
+
+  IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d 2>&1
+
+  docker ps -a
+  if [ $? -ne 0 ]; then
+    fatalln "Unable to start network"
+  fi
+
 }
 
 function networkDown() {
@@ -129,6 +164,32 @@ function networkDown() {
     warnln "Removing peer and orderer configurations"
     rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
   fi
+
+  # remove unwanted changes 
+  # Bring down the network, deleting the volumes
+  # Cleanup the chaincode containers
+  clearContainers
+
+  #Cleanup images
+  removeUnwantedImages
+
+  # remove orderer block and other channel configuration transactions and certs
+  docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf system-genesis-block/*.block organizations/peerOrganizations organizations/ordererOrganizations'
+  
+  ## remove fabric ca artifacts for manufacturer
+  docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/manufacturer/msp organizations/fabric-ca/manufacturer/tls-cert.pem organizations/fabric-ca/manufacturer/ca-cert.pem organizations/fabric-ca/manufacturer/IssuerPublicKey organizations/fabric-ca/manufacturer/IssuerRevocationPublicKey organizations/fabric-ca/manufacturer/fabric-ca-server.db'
+  
+  ## remove fabric ca artifacts for supplier
+  docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/supplier/msp organizations/fabric-ca/supplier/tls-cert.pem organizations/fabric-ca/supplier/ca-cert.pem organizations/fabric-ca/supplier/IssuerPublicKey organizations/fabric-ca/supplier/IssuerRevocationPublicKey organizations/fabric-ca/supplier/fabric-ca-server.db'
+  
+  ## remove fabric ca artifacts for retailer
+  docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/retailer/msp organizations/fabric-ca/retailer/tls-cert.pem organizations/fabric-ca/retailer/ca-cert.pem organizations/fabric-ca/retailer/IssuerPublicKey organizations/fabric-ca/retailer/IssuerRevocationPublicKey organizations/fabric-ca/retailer/fabric-ca-server.db'
+
+  ## remove fabric ca artifacts for orderer
+  docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db'
+
+  # remove channel and script artifacts
+  docker run --rm -v $(pwd):/data busybox sh -c 'cd /data && rm -rf channel-artifacts log.txt *.tar.gz'
 }
 
 function printHelp() {
@@ -139,13 +200,20 @@ function printHelp() {
 #      Script Begins Below           #
 ######################################
 
-#
-# Setting Some needed env variables
-#
+#####################################
+# Setting Some needed env variables #
+#####################################
 
+# using cryptogen for generating certificates and configs
 CRYPTO="cryptogen"
+# use this as the default docker-compose yaml definition
+COMPOSE_FILE_BASE=docker/docker-compose-supplychain-network.yaml
+# default image tag
+IMAGETAG="latest"
 
-## Parse mode
+##############
+# Parse mode #
+##############
 if [[ $# -lt 1 ]] ; then
   printHelp
   exit 0
