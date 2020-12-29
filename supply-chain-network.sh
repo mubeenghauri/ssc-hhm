@@ -5,6 +5,11 @@
 # @author: mubeenghauri                             #
 #####################################################
 
+#################################################################
+#             External Scripts Used in this Script 
+# - ./organizations/ccp-generate.sh
+#
+
 ###################################################################################
 # prepending $PWD/../bin to PATH to ensure we are picking up the correct binaries #
 # this may be commented out to resolve installed version of tools if desired      #
@@ -26,11 +31,30 @@ source scriptUtility.sh
 ########################################################################
 function clearContainers() {
   CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /dev-peer.*/) {print $1}')
+  PEER_CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /peer.*/) {print $1}')
+  ORDERER_CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /orderer.*/) {print $1}')
+  
   if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
     infoln "No containers available for deletion"
   else
     docker rm -f $CONTAINER_IDS
+    successln "Removed containers"
   fi
+
+  if [ -z "$PEER_CONTAINER_IDS" -o "$PEER_CONTAINER_IDS" == " " ]; then
+    infoln "No peer containers available for deletion"
+  else
+    docker rm -f $PEER_CONTAINER_IDS
+    successln "Removed peer containers"
+  fi
+
+  if [ -z "$ORDERER_CONTAINER_IDS" -o "$ORDERER_CONTAINER_IDS" == " " ]; then
+    infoln "No orderer containers available for deletion"
+  else
+    docker rm -f $ORDERER_CONTAINER_IDS
+    successln "Removed orderer containers"
+  fi
+  
 }
 
 #################################################################
@@ -227,4 +251,4 @@ if [ "$MODE" == "up" ]; then
 elif [ "$MODE" == "down" ]; then
   infoln "Bringing down Supply Chain Network ..."
   networkDown
-fi 
+fi
