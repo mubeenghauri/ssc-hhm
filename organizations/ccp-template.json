@@ -15,27 +15,27 @@
         "${ORGID}": {
             "mspid": "${ORGID}MSP",
             "peers": [
-                "peer0.${ORG}.hhm-ssc.com"
+                "peer0.${ORG}.ssc-hhm.com"
             ],
             "certificateAuthorities": [
-                "ca.${ORG}.hhm-ssc.com"
+                "ca.${ORG}.ssc-hhm.com"
             ]
         }
     },
     "peers": {
-        "peer0.${ORG}.hhm-ssc.com": {
+        "peer0.${ORG}.ssc-hhm.com": {
             "url": "grpcs://localhost:${P0PORT}",
             "tlsCACerts": {
                 "pem": "${PEERPEM}"
             },
             "grpcOptions": {
-                "ssl-target-name-override": "peer0.${ORG}.hhm-ssc.com",
-                "hostnameOverride": "peer0.${ORG}.hhm-ssc.com"
+                "ssl-target-name-override": "peer0.${ORG}.ssc-hhm.com",
+                "hostnameOverride": "peer0.${ORG}.ssc-hhm.com"
             }
         }
     },
     "certificateAuthorities": {
-        "ca.${ORG}.hhm-ssc.com": {
+        "ca.${ORG}.ssc-hhm.com": {
             "url": "https://localhost:${CAPORT}",
             "caName": "ca-${ORG}",
             "tlsCACerts": {
