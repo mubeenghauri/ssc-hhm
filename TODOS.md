@@ -6,13 +6,13 @@ Supply Chain Network Hyperledger Fabric 2.0
 =======
 
 
-## Docker Containers
+## Docker Containers    [DONE]
     - Create Docker file for Certificate Authority       [DONE]
       At docker/docker-compose-ca.yaml
       
     - Create Docker file for Supply Chain Network
       At docker/docker-compose-supply-chain-network.yaml 
-      This docker-compose file will contain configurations for our supply chain network  [two peer done, 1 left (i.e Retailer)]
+      This docker-compose file will contain configurations for our supply chain network  [DONE]
 
 ## Genesis Block Configuration      [DONE]
     - Configure system genesis block
@@ -31,7 +31,7 @@ Supply Chain Network Hyperledger Fabric 2.0
             4. Retailer     [DONE]
                 At organizations/cryptogen/crypto-config-manufacturer.yaml
    
-   ### Organizations Fabric Certificate Athurity Configuration
+   ### Organizations Fabric Certificate Athurity Configuration      [DONE]
         - Create certificate authority configurations for :
             1. Orderer      [DONE]
                 At organizations/fabric-ca/ordererOrg/fabric-ca-server-config.yaml
@@ -48,15 +48,19 @@ Supply Chain Network Hyperledger Fabric 2.0
         - Create RegisterUser script at [NO NEED]
             At organization/fabric-ca/registerEnroll.shs (only needed if $CRYPTO == "Certificate Authorities")
 
-## Network start up script [DOING]
+## Network start up script [DONE]
     - Complete network startup script
         Functions to implement
         - networkUp [DONE]
         - networkUp [DONE]
-        - deployCC
+        - createChannel [DONE]
+        - deployCC  [DONE]
 
-## Chaincodes
-    - Make necessary chaincodes
+## Helper Scripts [DONE]
+    - Create createChannel script 
+        At scripts/createChannel.sh [DONE]
+## Chaincodes [DONE]
+    - Make necessary chaincodes 
 
 ## Documentation
     - Maintain documentation of whole project
