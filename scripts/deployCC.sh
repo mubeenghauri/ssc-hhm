@@ -8,13 +8,15 @@ CC_SRC_PATH="${PWD}/supplychain-chaincode/"
 CC_SRC_LANGUAGE="javscript"
 CC_VERSION="1.0"
 CC_SEQUENCE="1"
-# CC_INIT_FCN=${7:-"NA"}
-# CC_END_POLICY=${8:-"NA"}
-# CC_COLL_CONFIG=${9:-"NA"}
+
 DELAY="3"
 MAX_RETRY="5"
 VERBOSE="true"
 CC_RUNTIME_LANGUAGE=node
+
+INIT_REQUIRED=""
+CC_END_POLICY=""
+CC_COLL_CONFIG=""
 
 println "executing with the following"
 println "- CHANNEL_NAME: ${C_GREEN}${CHANNEL_NAME}${C_RESET}"
@@ -31,109 +33,12 @@ CC_SRC_LANGUAGE=$(echo "$CC_SRC_LANGUAGE" | tr [:upper:] [:lower:])
 
 FABRIC_CFG_PATH=$PWD/../config/
 
-# User has not provided a path, therefore the CC_NAME must
-# be the short name of a known chaincode sample
-# if [ "$CC_SRC_PATH" = "NA" ]; then
-#   infoln "Determining the path to the chaincode"
-#   # first see which chaincode we have. This will be based on the
-#   # short name of the known chaincode sample
-#   if [ "$CC_NAME" = "basic" ]; then
-#     println $'\e[0;32m'asset-transfer-basic$'\e[0m' chaincode
-#     CC_SRC_PATH="../asset-transfer-basic"
-#   elif [ "$CC_NAME" = "events" ]; then
-#     println $'\e[0;32m'asset-transfer-events$'\e[0m' chaincode
-#     CC_SRC_PATH="../asset-transfer-events"
-#   elif [ "$CC_NAME" = "secured" ]; then
-#     println $'\e[0;32m'asset-transfer-secured-agreeement$'\e[0m' chaincode
-#     CC_SRC_PATH="../asset-transfer-secured-agreement"
-#   elif [ "$CC_NAME" = "ledger" ]; then
-#     println $'\e[0;32m'asset-transfer-ledger-agreeement$'\e[0m' chaincode
-#     CC_SRC_PATH="../asset-transfer-ledger-queries"
-#   elif [ "$CC_NAME" = "private" ]; then
-#     println $'\e[0;32m'asset-transfer-private-data$'\e[0m' chaincode
-#     CC_SRC_PATH="../asset-transfer-private-data"
-#   elif [ "$CC_NAME" = "sbe" ]; then
-#     println $'\e[0;32m'asset-transfer-sbe$'\e[0m' chaincode
-#     CC_SRC_PATH="../asset-transfer-sbe"
-#   else
-#     fatalln "The chaincode name ${CC_NAME} is not supported by this script. Supported chaincode names are: basic, events, ledger, private, sbe, secured"
-#   fi
-
-  # now see what language it is written in
-  # if [ "$CC_SRC_LANGUAGE" = "go" ]; then
-  #   CC_SRC_PATH="$CC_SRC_PATH/chaincode-go/"
-  # elif [ "$CC_SRC_LANGUAGE" = "java" ]; then
-  #   CC_SRC_PATH="$CC_SRC_PATH/chaincode-java/"
-  # elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
-  #   CC_SRC_PATH="$CC_SRC_PATH/chaincode-javascript/"
-  # elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
-  #   CC_SRC_PATH="$CC_SRC_PATH/chaincode-typescript/"
-  # fi
-
-  # check that the language is available for the sample chaincode
-  # if [ ! -d "$CC_SRC_PATH" ]; then
-  #   fatalln "The smart contract language \"$CC_SRC_LANGUAGE\" is not yet available for the \"$CC_NAME\" sample smart contract"
-  # fi
 ## Make sure that the path the chaincode exists if provided
 if [ ! -d "$CC_SRC_PATH" ]; then
   fatalln "Path to chaincode does not exist. Please provide different path"
 fi
 
-# do some language specific preparation to the chaincode before packaging
-# if [ "$CC_SRC_LANGUAGE" = "go" ]; then
-#   CC_RUNTIME_LANGUAGE=golang
 
-#   infoln "Vendoring Go dependencies at $CC_SRC_PATH"
-#   pushd $CC_SRC_PATH
-#   GO111MODULE=on go mod vendor
-#   popd
-#   successln "Finished vendoring Go dependencies"
-
-# elif [ "$CC_SRC_LANGUAGE" = "java" ]; then
-#   CC_RUNTIME_LANGUAGE=java
-
-#   infoln "Compiling Java code..."
-#   pushd $CC_SRC_PATH
-#   ./gradlew installDist
-#   popd
-#   successln "Finished compiling Java code"
-#   CC_SRC_PATH=$CC_SRC_PATH/build/install/$CC_NAME
-
-# elif [ "$CC_SRC_LANGUAGE" = "javascript" ]; then
-#   CC_RUNTIME_LANGUAGE=node
-
-# elif [ "$CC_SRC_LANGUAGE" = "typescript" ]; then
-#   CC_RUNTIME_LANGUAGE=node
-
-#   infoln "Compiling TypeScript code into JavaScript..."
-#   pushd $CC_SRC_PATH
-#   npm install
-#   npm run build
-#   popd
-#   successln "Finished compiling TypeScript code into JavaScript"
-
-# else
-#   fatalln "The chaincode language ${CC_SRC_LANGUAGE} is not supported by this script. Supported chaincode languages are: go, java, javascript, and typescript"
-#   exit 1
-# fi
-
-# INIT_REQUIRED="--init-required"
-# check if the init fcn should be called
-# if [ "$CC_INIT_FCN" = "NA" ]; then
-  INIT_REQUIRED=""
-# fi
-
-# if [ "$CC_END_POLICY" = "NA" ]; then
-  CC_END_POLICY=""
-# else
-  # CC_END_POLICY="--signature-policy $CC_END_POLICY"
-# fi
-
-# if [ "$CC_COLL_CONFIG" = "NA" ]; then
-  CC_COLL_CONFIG=""
-# else
-  # CC_COLL_CONFIG="--collections-config $CC_COLL_CONFIG"
-# fi
 
 # import utils
 . scripts/envVar.sh
@@ -221,10 +126,7 @@ checkCommitReadiness() {
 
 # commitChaincodeDefinition VERSION PEER ORG (PEER ORG)...
 commitChaincodeDefinition() {
-  # parsePeerConnectionParameters $@
-  # res=$?
-  # verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
-
+ 
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
@@ -361,14 +263,5 @@ commitChaincodeDefinition "manufacturer" "supplier" "retailer"
 queryCommitted "manufacturer"
 queryCommitted "supplier"
 queryCommitted "retailer"
-
-
-## Invoke the chaincode - this does require that the chaincode have the 'initLedger'
-## method defined
-# if [ "$CC_INIT_FCN" = "NA" ]; then
-  infoln "Chaincode initialization is not required"
-# else
-#   chaincodeInvokeInit 1 2
-# fi
 
 exit 0

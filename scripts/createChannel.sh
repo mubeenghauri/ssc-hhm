@@ -1,15 +1,12 @@
 #!/bin/bash
 
-source scriptUtils.sh
+source scriptUtility.sh
 
 CHANNEL_NAME="sc"
 DELAY="3"
 MAX_RETRY="5"
 VERBOSE="true"
-# : ${CHANNEL_NAME:="supplychain"}
-# : ${DELAY:="3"}
-# : ${MAX_RETRY:="5"}
-# : ${VERBOSE:="false"}
+
 
 # import utils
 . scripts/envVar.sh
