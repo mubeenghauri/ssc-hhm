@@ -65,8 +65,8 @@ echo "[ccp-generate] Generating ccp config for Retailer ..."
 
 ORG=retailer
 ORGID=Retailer
-P0PORT=10051
-CAPORT=9054
+P0PORT=11051
+CAPORT=11054
 PEERPEM=organizations/peerOrganizations/retailer.ssc-hhm.com/tlsca/tlsca.retailer.ssc-hhm.com-cert.pem
 CAPEM=organizations/peerOrganizations/retailer.ssc-hhm.com/ca/ca.retailer.ssc-hhm.com-cert.pem
 
