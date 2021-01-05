@@ -265,11 +265,12 @@ class SupplyChainContract extends Contract {
 
  	/* 
  	 * Records sending of batch
- 	 * 
+ 	 * It is an example of a malicious 
+	 * function 
  	 * @param ctx Ledger Context
  	 * @return Transaction
  	 */
-    async sendBatch(ctx, to, batchid, cost, dd) {
+    async malicious_sendBatch(ctx, to, batchid, cost, dd) {
 
     	// check if batch exists
 	    const batch = await ctx.stub.getState(batchid); 
@@ -290,11 +291,37 @@ class SupplyChainContract extends Contract {
 
    		// record transaction
   		const trx = await this.createTransaction(ctx, from, to, cost, batchid, dd, "N/A", `sending batch from: ${from}, to: ${to} with cost ${cost}`);
-  		return trx;
+		return "Batch sent";
+    }
+
+	/* 
+ 	 * Records sending of batch
+ 	 * 
+ 	 * @param ctx Ledger Context
+ 	 * @return Transaction
+ 	 */
+	 async sendBatch(ctx, from, to, batchid, cost, dd) {
+
+    	// check if batch exists
+	    const batch = await ctx.stub.getState(batchid); 
+    	if (!batch || batch.length == 0) {
+            throw new Error(`${batchid} does not exists !`);
+        }
+
+
+        // check is 'to' is a valid org
+        const orgs = this.getRegisteredOrgs();
+        if(!orgs.includes(to)) {
+        	throw new Error(`${to} is not a valid organization, it should be one of ${orgs.toString()}`);
+        }
+
+   		// record transaction
+  		const trx = await this.createTransaction(ctx, from, to, cost, batchid, dd, "N/A", `sending batch from: ${from}, to: ${to} with cost ${cost}`);
+		return "Batch sent";
     }
 
 	async createTransaction(ctx, from, to, cost, batchId, dd, da, desc) {
-
+		console.info('============= Creating Transaction ===========');
 		// create tansaction id
 		const allTrx = await this.getTransactions(ctx);
 		const numTrx = allTrx.length+1;
@@ -315,7 +342,9 @@ class SupplyChainContract extends Contract {
 
 		// add transaction to ledger
 		await ctx.stub.putState(trxId, Buffer.from(JSON.stringify(trx)));
-		return trx;
+		console.log(trx);
+		console.info('============= Created Transaction ===========');
+		// return JSON.stringify(trx);
 	}
 
 	async getTransactions(ctx) {
@@ -341,12 +370,12 @@ class SupplyChainContract extends Contract {
 	/*
 	 *
 	 */
-    async recieveBatch(ctx, trxid, batchid, date) {
+    async recieveBatch(ctx,reciever, trxid, batchid, date) {
     	// get all transactions
     	const trxs = await getTransactions(ctx);
 
     	// get invoker orgs name
-    	const to = this.getInvokerOrg(ctx);
+    	const to = reciever;
     	console.log("Got to : ", to);
     	// verify is org has been sent a batch
     	for(var i = 0; i < trxs.length; i++) {
@@ -366,7 +395,7 @@ class SupplyChainContract extends Contract {
 		       	// save updated batch and transactions
 		       	ctx.stub.putState(trxs[i].trxid, Buffer.from(JSON.stringify(trxs[i])));
 		       	ctx.stub.putState(batchParsed.batchId, Buffer.from(JSON.stringify(batchParsed)));
-
+			
 		       	return `Updated TRX : ${JSON.stringify(trxs)} \n Updated Batch ${JSON.stringify(batchParsed)}`;
     		}
     	}
