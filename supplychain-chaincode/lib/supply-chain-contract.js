@@ -5,7 +5,6 @@
 //
 // Fabric Contract API : https://hyperledger.github.io/fabric-chaincode-node/master/api/tutorial-using-contractinterface.html
 //
-// ./network.sh deployCC -ccn supplychain -ccp ../supplychain-chaincode -ccv 1 -ccl javasctipt
 //
 // 
 'use-strict'
@@ -270,7 +269,7 @@ class SupplyChainContract extends Contract {
  	 * @param ctx Ledger Context
  	 * @return Transaction
  	 */
-    async malicious_sendBatch(ctx, to, batchid, cost, dd) {
+	async malicious_sendBatch(ctx, to, batchid, cost, dd) {
 
     	// check if batch exists
 	    const batch = await ctx.stub.getState(batchid); 
@@ -371,21 +370,26 @@ class SupplyChainContract extends Contract {
 	 *
 	 */
     async recieveBatch(ctx,reciever, trxid, batchid, date) {
-    	// get all transactions
-    	const trxs = await getTransactions(ctx);
+		console.info('============= Recieving Batch ===========');
 
+    	// get all transactions
+    	var trxs = await this.getTransactions(ctx);
+		console.log("TRXS", trxs);
     	// get invoker orgs name
     	const to = reciever;
     	console.log("Got to : ", to);
     	// verify is org has been sent a batch
     	for(var i = 0; i < trxs.length; i++) {
-    		if(trsx[i].trxId == trxid && trxs.batchId == batchid && trxs.dateArrival == "N/A") {
+			// as we need only record, not key
+			var trx = trxs[i].Record;
+			console.log("TRX", trx);
+    		if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
     			console.info("Got transaction ", trxs[i]);
     			// mark arrival date
-    			trxs[i].dateArrival = date;
+    			trx.dateArrival = date;
 
     			// change batch's owner
-    			const batch = await ctx.stub.getState(batchId);
+    			const batch = await ctx.stub.getState(batchid);
 		       	const batchParsed = JSON.parse(batch.toString());
 		       	// add current owner to previous owner
 		       	batchParsed.previousOwners.push(batchParsed.owner);
@@ -393,12 +397,14 @@ class SupplyChainContract extends Contract {
 		       	batchParsed.owner = to;
 
 		       	// save updated batch and transactions
-		       	ctx.stub.putState(trxs[i].trxid, Buffer.from(JSON.stringify(trxs[i])));
+		       	ctx.stub.putState(trx.trxid, Buffer.from(JSON.stringify(trx)));
 		       	ctx.stub.putState(batchParsed.batchId, Buffer.from(JSON.stringify(batchParsed)));
+				console.info('============= Recieved Batch ===========');
 			
 		       	return `Updated TRX : ${JSON.stringify(trxs)} \n Updated Batch ${JSON.stringify(batchParsed)}`;
     		}
     	}
+		console.info('============= Recieving Batch ERROR ===========');
 
     	// if we are here, it means that we didnt found the transactions
     	throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've been sent a batch !!`);

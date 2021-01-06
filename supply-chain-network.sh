@@ -2,7 +2,7 @@
 
 #####################################################
 # Bash Script to manage our Supply Chain Network    #
-# @author: mubeenghauri                             #
+# @author: SSC-HHM                                  #
 #####################################################
 
 #################################################################
@@ -87,10 +87,6 @@ function createOrgs() {
 
   infoln "Creating Peer Orgs and Orderer ...."
 
-  if [ -d "organizations/peerOrganizations" ]; then
-    rm -Rf organizations/peerOrganizations && rm -Rf organizations/ordererOrganizations
-  fi
-
   #
   # Create crypto material (identities) using cryptogen
   #
@@ -145,47 +141,6 @@ function createOrgs() {
       fatalln "Failed to generate certificates for Orderer..."
     fi
   fi
-
-  #
-  # Create identities using Fabric Certificate Authority
-  #
-
-  # if [ "$CRYPTO" == "Certificate Authorities" ]; then
-
-  #   infoln "Generate certificates using Fabric CA's"
-
-  #   IMAGE_TAG=${CA_IMAGETAG} docker-compose -f $COMPOSE_FILE_CA up -d 2>&1
-
-  #   . organizations/fabric-ca/registerEnroll.sh
-
-  #   while :
-  #     do
-  #       if [ ! -f "organizations/fabric-ca/manufacturer/tls-cert.pem" ]; then
-  #         sleep 1
-  #         echo "Sleeping"
-  #       else
-  #         break
-  #       fi
-  #     done
-
-  #   infoln "Create Manufacturer Identities"
-
-  #   createManufacturer
-
-  #   infoln "Create Supplier Identities"
-
-  #   createSupplier
-
-  #   infoln "Create Retailer Identities"
-
-  #   createRetailer
-
-  #   infoln "Create Orderer Org Identities"
-
-  #   createOrderer
-
-  # fi
-
 
   infoln "Generate CCP files for Manufacturer, Supplier and Retailer"
   ./organizations/ccp-generate.sh

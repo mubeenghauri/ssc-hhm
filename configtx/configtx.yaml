@@ -19,7 +19,6 @@
 ################################################################################
 Organizations:
 
-    # SampleOrg defines an MSP using the sampleconfig.  It should never be used
     # in production but may be used as a template for other definitions
     - &OrdererOrg
         # DefaultOrg defines the organization which is used in the sampleconfig
@@ -35,13 +34,6 @@ Organizations:
 
         # Policies defines the set of policies at this level of the config tree
 
-        #########################################################################
-        # SignaturePolicy: This policy type is the most powerful, and specifies #
-        # the policy as a combination of evaluation rules for MSP Principals.   #
-        # It supports arbitrary combinations of AND, OR, and NOutOf, allowing   #
-        # the construction of extremely powerful rules like:                    #
-        # “An admin of org A and 2 other admins, or 11 of 20 org admins”.       #
-        #########################################################################
         Policies:
             Readers:
                 Type: Signature
@@ -66,9 +58,6 @@ Organizations:
 
         MSPDir: ../organizations/peerOrganizations/manufacturer.ssc-hhm.com/msp
 
-        # Policies defines the set of policies at this level of the config tree
-        # For organization policies, their canonical path is usually
-        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
         Policies:
             Readers:
                 Type: Signature
