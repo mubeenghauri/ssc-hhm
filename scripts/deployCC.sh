@@ -170,24 +170,6 @@ queryCommitted() {
   fi
 }
 
-chaincodeInvokeInit() {
-  parsePeerConnectionParameters $@
-  res=$?
-  verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
-
-  # while 'peer chaincode' command can get the orderer endpoint from the
-  # peer (if join was successful), let's supply it directly as we know
-  # it using the "-o" option
-  set -x
-  fcn_call='{"function":"'${CC_INIT_FCN}'","Args":[]}'
-  infoln "invoke fcn call:${fcn_call}"
-  peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.ssc-hhm.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} $PEER_CONN_PARMS --isInit -c ${fcn_call} >&log.txt
-  res=$?
-  { set +x; } 2>/dev/null
-  cat log.txt
-  verifyResult $res "Invoke execution on $PEERS failed "
-  successln "Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME'"
-}
 
 chaincodeQuery() {
   ORG=$1
@@ -218,7 +200,7 @@ chaincodeQuery() {
 ##  package the chaincode
 packageChaincode
 
-## Install chaincode on peer0.org1 and peer0.org2
+## Install chaincode on peer0 of manufacturer, supplier , retailer
 infoln "Installing chaincode on peer0.manufacturer..."
 installChaincode "manufacturer"
 infoln "Install chaincode on peer0.retailer..."
@@ -229,11 +211,11 @@ installChaincode "supplier"
 ## query whether the chaincode is installed
 queryInstalled "manufacturer"
 
-## approve the definition for org1
+## approve the definition for manufacturer
 approveForMyOrg "manufacturer"
 
 ## check whether the chaincode definition is ready to be committed
-## expect org1 to have approved and org2 not to
+## expect manufacturer to have approved and supplier, retailer not to
 checkCommitReadiness "manufacturer" "\"ManufacturerMSP\": true" "\"SupplierMSP\": false" "\"RetailerMSP\": false" 
 checkCommitReadiness "supplier" "\"ManufacturerMSP\": true" "\"SupplierMSP\": false" "\"RetailerMSP\": false"
 checkCommitReadiness "retailer" "\"ManufacturerMSP\": true" "\"SupplierMSP\": false" "\"RetailerMSP\": false"

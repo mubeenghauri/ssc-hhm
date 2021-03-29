@@ -142,6 +142,7 @@ function createOrgs() {
     fi
   fi
 
+  # client configuration profiles
   infoln "Generate CCP files for Manufacturer, Supplier and Retailer"
   ./organizations/ccp-generate.sh
 }
@@ -167,7 +168,7 @@ function createConsortium() {
   fi
 }
 
-## call the script to join create the channel and join the peers of org1 and org2
+## call the script to join create the channel and join the peers of manufacturer and supplier retailer
 function createChannel() {
 
 ## Bring up the network if it is not already up.
