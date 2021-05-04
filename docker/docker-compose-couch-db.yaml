@@ -1,0 +1,57 @@
+
+version: '2'
+
+networks:
+  supplychain:
+
+services:
+  couchdb0:
+    container_name: couchdb0
+    image: couchdb:2
+  
+    ports:
+      - "5984:5984"
+    networks:
+      - supplychain
+
+  peer0.manufacturer.ssc-hhm.com:
+    environment:
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+      
+    depends_on:
+      - couchdb0
+
+  couchdb1:
+    container_name: couchdb1
+    image: couchdb:2
+    
+    ports:
+      - "7984:5984"
+    networks:
+      - supplychain
+
+  peer0.supplier.ssc-hhm.com:
+    environment:
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
+      
+    depends_on:
+      - couchdb1
+
+  couchdb2:
+    container_name: couchdb2
+    image: couchdb:2
+    
+    ports:
+      - "9984:5984"
+    networks:
+      - supplychain
+
+  peer0.retailer.ssc-hhm.com:
+    environment:
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb2:5984
+      
+    depends_on:
+      - couchdb2

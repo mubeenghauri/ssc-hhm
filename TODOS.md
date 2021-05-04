@@ -31,17 +31,7 @@ Supply Chain Network Hyperledger Fabric 2.0
             4. Retailer     [DONE]
                 At organizations/cryptogen/crypto-config-manufacturer.yaml
    
-   ### Organizations Fabric Certificate Athurity Configuration      [DONE]
-        - Create certificate authority configurations for :
-            1. Orderer      [DONE]
-                At organizations/fabric-ca/ordererOrg/fabric-ca-server-config.yaml
-            2. Manufacturer [DONE]
-                At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
-            3. Supplier     [DONE]
-                At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
-            4. Retailer     [DONE]
-                At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
-   
+
    ##### Generate CCP [DONE]
         - Create CCP script  [DONE]
             At organization/ccp-generate.sh
@@ -64,3 +54,28 @@ Supply Chain Network Hyperledger Fabric 2.0
 
 ## Documentation
     - Maintain documentation of whole project
+
+
+
+# TODOs FOR FYP 2
+=================
+
+   ### Organizations Fabric Certificate Athurity Configuration      [DONE]
+        - Create certificate authority configurations for :
+            1. Orderer      [DONE]
+                At organizations/fabric-ca/ordererOrg/fabric-ca-server-config.yaml
+            2. Manufacturer [DONE]
+                At organizations/fabric-ca/manufacturer/fabric-ca-server-config.yaml
+            3. Supplier     [DONE]
+                At organizations/fabric-ca/supplier/fabric-ca-server-config.yaml
+            4. Retailer     [DONE]
+                At organizations/fabric-ca/retailer/fabric-ca-server-config.yaml
+        
+        - Create Docker compose file
+            At docker/docker-compose-ca.yaml
+        
+        - Create registerEnroll script 
+            (Fix paths)
+            organtizations/fabric-ca/registerEnroll.sh
+
+   ### Create Client application.

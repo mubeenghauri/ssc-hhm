@@ -107,7 +107,7 @@ services:
       - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
       - CORE_PEER_CHAINCODEADDRESS=peer0.retailer.ssc-hhm.com:11052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.supplier.ssc-hhm.com:11051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.retailer.ssc-hhm.com:11051
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.retailer.ssc-hhm.com:11051
       - CORE_PEER_LOCALMSPID=RetailerMSP
     volumes:

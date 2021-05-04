@@ -64,7 +64,7 @@ Organizations:
                 Rule: "OR('ManufacturerMSP.admin', 'ManufacturerMSP.peer', 'ManufacturerMSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('ManufacturerMSP.admin', 'ManufacturerMSP.client')"
+                Rule: "OR('ManufacturerMSP.admin','ManufacturerMSP.peer', 'ManufacturerMSP.member', 'ManufacturerMSP.client')"
             Admins:
                 Type: Signature
                 Rule: "OR('ManufacturerMSP.admin')"
@@ -100,7 +100,7 @@ Organizations:
                 Rule: "OR('SupplierMSP.admin', 'SupplierMSP.peer', 'SupplierMSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('SupplierMSP.admin', 'SupplierMSP.client')"
+                Rule: "OR('SupplierMSP.admin','SupplierMSP.peer','SupplierMSP.member', 'SupplierMSP.client')"
             Admins:
                 Type: Signature
                 Rule: "OR('SupplierMSP.admin')"
@@ -135,7 +135,7 @@ Organizations:
                 Rule: "OR('RetailerMSP.admin', 'RetailerMSP.peer', 'RetailerMSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('RetailerMSP.admin', 'RetailerMSP.client')"
+                Rule: "OR('RetailerMSP.admin', 'RetailerMSP.peer','RetailerMSP.member', 'RetailerMSP.client')"
             Admins:
                 Type: Signature
                 Rule: "OR('RetailerMSP.admin')"
