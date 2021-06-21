@@ -21,6 +21,8 @@ export PATH=${PWD}/../bin:$PATH
 export FABRIC_CFG_PATH=${PWD}/configtx
 export VERBOSE=false
 
+# neat little trick to make
+# console outputs rangeen
 source scriptUtility.sh
 
 ################################
@@ -29,14 +31,16 @@ source scriptUtility.sh
 
 ########################################################################
 # Obtain CONTAINER_IDS and remove them                                 #
-# TODO Might want to make this optional - could clear other containers #
 # This function is called when you bring a network down                #
+# Without calling this function, you could get in a world of great pain#
 ########################################################################
 function clearContainers() {
   CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /dev-peer.*/) {print $1}')
   PEER_CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /peer.*/) {print $1}')
   ORDERER_CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /orderer.*/) {print $1}')
   CA_CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /ca.*/) {print $1}')
+  COUCH_CONTAINER_IDS=$(docker ps -a | awk '($2 ~ /couch.*/) {print $1}')
+
   
   if [ -z "$CONTAINER_IDS" -o "$CONTAINER_IDS" == " " ]; then
     infoln "No containers available for deletion"
@@ -65,6 +69,14 @@ function clearContainers() {
     docker rm -f $CA_CONTAINER_IDS
     successln "Removed CA containers"
   fi
+
+  ## for couchdb containers
+  if [ -z "$COUCH_CONTAINER_IDS" -o "$COUCH_CONTAINER_IDS" == " " ]; then
+    infoln "No Couchdb containers available for deletion"
+  else
+    docker rm -f $COUCH_CONTAINER_IDS
+    successln "Removed Couchdb containers"
+  fi
 }
 
 #################################################################
@@ -72,6 +84,7 @@ function clearContainers() {
 # specifically the following images are often left behind:      #
 # This function is called when you bring the network down       #
 #################################################################
+# NOTE: Harmless but redundent, no need, clear container does all
 function removeUnwantedImages() {
   DOCKER_IMAGE_IDS=$(docker images | awk '($1 ~ /dev-peer.*/) {print $3}')
   if [ -z "$DOCKER_IMAGE_IDS" -o "$DOCKER_IMAGE_IDS" == " " ]; then
@@ -88,60 +101,96 @@ function createOrgs() {
   infoln "Creating Peer Orgs and Orderer ...."
 
   #
-  # Create crypto material (identities) using cryptogen
+  # Create crypto material (identities) ....
   #
 
-  if [ "$CRYPTO" == "cryptogen" ]; then
-    which cryptogen
-    if [ "$?" -ne 0 ]; then
-      fatalln "cryptogen tool not found. exiting"
-    fi
-    infoln "Generate certificates using cryptogen tool"
+  # using Cryptogen tool
+  # if [ "$CRYPTO" == "cryptogen" ]; then
+  #   which cryptogen
+  #   if [ "$?" -ne 0 ]; then
+  #     fatalln "cryptogen tool not found. exiting"
+  #   fi
+  #   infoln "Generate certificates using cryptogen tool"
 
-    infoln "Creating Manufacturer's Identities"
+  #   infoln "Creating Manufacturer's Identities"
 
-    set -x
-    cryptogen generate --config=./organizations/cryptogen/crypto-config-manufacturer.yaml --output="organizations"
-    res=$?
-    { set +x; } 2>/dev/null             ## 2 here means stderr, '>' means to redirect LHS to RHS of '>'.
-                                        ## /dev/null is a null file, 
-                                        ## 2>/dev/null means to throw all errors to /dev/null, meaning 
-                                        ## dont show it
-    if [ $res -ne 0 ]; then
-      fatalln "Failed to generate certificate for Manufacturer..."
-    fi
+  #   set -x
+  #   cryptogen generate --config=./organizations/cryptogen/crypto-config-manufacturer.yaml --output="organizations"
+  #   res=$?
+  #   { set +x; } 2>/dev/null             ## 2 here means stderr, '>' means to redirect LHS to RHS of '>'.
+  #                                       ## /dev/null is a null file, 
+  #                                       ## 2>/dev/null means to throw all errors to /dev/null, meaning 
+  #                                       ## dont show it
+  #   if [ $res -ne 0 ]; then
+  #     fatalln "Failed to generate certificate for Manufacturer..."
+  #   fi
 
-    infoln "Creating Supplier's Identities"
+  #   infoln "Creating Supplier's Identities"
 
-    set -x
-    cryptogen generate --config=./organizations/cryptogen/crypto-config-supplier.yaml --output="organizations"
-    res=$?
-    { set +x; } 2>/dev/null
-    if [ $res -ne 0 ]; then
-      fatalln "Failed to generate certificates for Supplier..."
-    fi
+  #   set -x
+  #   cryptogen generate --config=./organizations/cryptogen/crypto-config-supplier.yaml --output="organizations"
+  #   res=$?
+  #   { set +x; } 2>/dev/null
+  #   if [ $res -ne 0 ]; then
+  #     fatalln "Failed to generate certificates for Supplier..."
+  #   fi
 
-    infoln "Creating Retailer's Identities"
+  #   infoln "Creating Retailer's Identities"
 
-    set -x
-    cryptogen generate --config=./organizations/cryptogen/crypto-config-retailer.yaml --output="organizations"
-    res=$?
-    { set +x; } 2>/dev/null
-    if [ $res -ne 0 ]; then
-      fatalln "Failed to generate certificates for Retailer..."
-    fi
+  #   set -x
+  #   cryptogen generate --config=./organizations/cryptogen/crypto-config-retailer.yaml --output="organizations"
+  #   res=$?
+  #   { set +x; } 2>/dev/null
+  #   if [ $res -ne 0 ]; then
+  #     fatalln "Failed to generate certificates for Retailer..."
+  #   fi
 
-    infoln "Creating Orderer Org Identities"
+  #   infoln "Creating Orderer Org Identities"
 
-    set -x
-    cryptogen generate --config=./organizations/cryptogen/crypto-config-orderer.yaml --output="organizations"
-    res=$?
-    { set +x; } 2>/dev/null
-    if [ $res -ne 0 ]; then
-      fatalln "Failed to generate certificates for Orderer..."
-    fi
+  #   set -x
+  #   cryptogen generate --config=./organizations/cryptogen/crypto-config-orderer.yaml --output="organizations"
+  #   res=$?
+  #   { set +x; } 2>/dev/null
+  #   if [ $res -ne 0 ]; then
+  #     fatalln "Failed to generate certificates for Orderer..."
+  #   fi
+  # fi # end cryptogen
+
+  # when $Crpto is set to use CA
+  if [ "$CRYPTO" == "Certificate Authorities" ]; then
+    infoln "Genereating Certificates using Fabric CA(s) ... "
+    IMAGE_TAG=${CA_IMAGETAG} docker-compose -f $COMPOSE_FILE_CA up -d #2>&1
+
+    # load functions to register and enroll user.
+    . organizations/fabric-ca/registerEnroll.sh
+
+    # jugaaar
+    # wait till the certificates are created, 
+    # only then continue to registering user, 
+    # else Fabric will complain about it.
+    while :
+      do
+        if [ ! -f "organizations/fabric-ca/manufacturer/tls-cert.pem" ]; then
+          sleep 1
+        else
+          break
+        fi
+      done
+    # end jugaar
+
+    infoln "Creating Manufacturer identities"
+    createManufacturerCA
+
+    infoln "Creating Supplier identities"
+    createSupplierCA
+
+    infoln "Creating Retailer identities"
+    createRetailerCA
+
+    infoln "Finally, Creating Order identities"
+    createOrderer
+
   fi
-
   # client configuration profiles
   infoln "Generate CCP files for Manufacturer, Supplier and Retailer"
   ./organizations/ccp-generate.sh
@@ -200,9 +249,11 @@ function networkUp() {
     warnln "organizations/peerOrganizations already exist !!! It shouldnt for development, LOOK INTO IT !!"
   fi
 
-  COMPOSE_FILES="-f ${COMPOSE_FILE_BASE}"
+  #COMPOSE_FILES="-f ${COMPOSE_FILE_BASE}"
+  # added couch db compose file path
+  COMPOSE_FILES="-f ${COMPOSE_FILE_BASE} -f ${COUCH_COMPOSE_FILE}"
 
-  IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d 2>&1
+  IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d
 
   docker ps -a
   if [ $? -ne 0 ]; then
@@ -280,12 +331,14 @@ export CORE_PEER_ADDRESS=localhost:7051
 echo $CORE_PEER_LOCALMSPID
 echo $CORE_PEER_TLS_ROOTCERT_FILE
 # using cryptogen for generating certificates and configs
-CRYPTO="cryptogen"
-# CRYPTO="Certificate Authorities"
+# CRYPTO="cryptogen"
+CRYPTO="Certificate Authorities"
 # use this as the default docker-compose yaml definition
 COMPOSE_FILE_BASE=docker/docker-compose-supplychain-network.yaml
 # certificate authorities compose file
 COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
+# couch db compose file
+COUCH_COMPOSE_FILE=docker/docker-compose-couch-db.yaml
 # default image tag
 IMAGETAG="latest"
 # default ca image tag
