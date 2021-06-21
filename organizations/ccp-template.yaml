@@ -16,7 +16,7 @@ organizations:
     - ca.${ORG}.ssc-hhm.com
 peers:
   peer0.${ORG}.ssc-hhm.com:
-    url: grpc://localhost:${P0PORT}
+    url: grps://localhost:${P0PORT}
     tlsCACerts:
       pem: |
           ${PEERPEM}
