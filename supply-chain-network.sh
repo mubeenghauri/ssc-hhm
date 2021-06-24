@@ -325,7 +325,7 @@ function printHelp() {
 export CORE_PEER_TLS_ENABLED=true
 export CORE_PEER_LOCALMSPID="ManufacturerMSP"
 export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/manufacturer.ssc-hhm.com/peers/peer0.manufacturer.ssc-hhm.com/tls/ca.crt
-export CORE_PEER_MSPCONFIGPATH=/home/mubeen/go/src/github.com/hyperledger/fabric-samples/supply-chain-network/organizations/peerOrganizations/manufacturer.ssc-hhm.com/users/Admin@manufacturer.ssc-hhm.com/msp
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/manufacturer.ssc-hhm.com/users/Admin@manufacturer.ssc-hhm.com/msp
 export CORE_PEER_ADDRESS=localhost:7051
 
 echo $CORE_PEER_LOCALMSPID
