@@ -1,1 +1,5 @@
 *.code-workspace
+organizations/fabric-ca/manufacturer/
+organizations/fabric-ca/supplier/
+organizations/fabric-ca/retailer/
+
