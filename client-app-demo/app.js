@@ -20,7 +20,7 @@ const channelName = 'sc';
 const chaincodeName = 'supplychain';
 const mspManufacturer = 'ManufacturerMSP';
 const walletPath = path.join(__dirname, 'wallet');
-const userId = 'user3';
+const userId = 'user2';
 const adminUserId = 'manufactureradmin';
 const adminUserPass = 'manufactureradminpw';
 
@@ -174,7 +174,7 @@ async function main() {
 
         await enrollAdmin(caClient, wallet, mspManufacturer);
 
-        await registerAndEnrollUser(caClient, wallet, mspManufacturer, userId, 'manufacturer.department1');
+        await registerAndEnrollUser(caClient, wallet, mspManufacturer, userId, 'manufacturer.desktop-client');
 
         const gateway = new Gateway();
 
