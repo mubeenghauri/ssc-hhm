@@ -174,7 +174,7 @@ async function main() {
 
         await enrollAdmin(caClient, wallet, mspSupplier);
 
-        await registerAndEnrollUser(caClient, wallet, mspSupplier, userId, 'supplier.department1');
+        await registerAndEnrollUser(caClient, wallet, mspSupplier, userId, 'supplier.desktop-client');
 
         const gateway = new Gateway();
 
@@ -201,12 +201,12 @@ async function main() {
             console.log("---- got contract");
 
 
-   //          console.log('\n--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger');
+            // console.log('\n--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger');
 			// await contract.submitTransaction('initLedger');
 			// console.log('*** Result: committed');
 
             console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
-			let result = await contract.evaluateTransaction('getAllBatches');
+			let result = await contract.submitTransaction('getAllBatches');
 			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
         }  finally {
 			// Disconnect from the gateway when the application is closing

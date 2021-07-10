@@ -20,7 +20,7 @@ const channelName = 'sc';
 const chaincodeName = 'supplychain';
 const mspManufacturer = 'ManufacturerMSP';
 const walletPath = path.join(__dirname, 'wallet');
-const userId = 'user2';
+const userId = 'user4';
 const adminUserId = 'manufactureradmin';
 const adminUserPass = 'manufactureradminpw';
 
