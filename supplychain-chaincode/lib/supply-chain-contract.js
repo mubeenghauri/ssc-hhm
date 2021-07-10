@@ -49,7 +49,7 @@ class SupplyChainContract extends Contract {
 		await ctx.stub.setEvent( event, data);
 	}
 
-	/*
+	/**
 	 * populate ledger with dummy data, for dev
 	 * @param ctx : Transaction Context 
 	 */
@@ -117,7 +117,7 @@ class SupplyChainContract extends Contract {
         console.info('============= Ledger Initialized !! ===========');
 	}
 
-	/*
+	/**
 	 * Returns json representation of all batches
 	 * stored in ledger
 	 * @return allBatches
@@ -144,7 +144,7 @@ class SupplyChainContract extends Contract {
         return JSON.stringify(allResults);
     }
 
-    /*
+    /**
      * Adds an item to an already created batch
      * This function does not create product instance
      * For this a product instance should be present, 
@@ -203,7 +203,7 @@ class SupplyChainContract extends Contract {
      }
 
 
-    /*
+    /**
      * Adds a product entry into a given batch 
      * This function only creates the product instance
      * with given productId, it does not add items
@@ -248,7 +248,7 @@ class SupplyChainContract extends Contract {
 
        	console.info(`[SUCCESS] Added product : ${productId} to batch : ${batchId}`);
 		console.info("Updated batch : ", batchParsed);
-		await ctx.stub.putState(batchId, this.o2b(batchParsed)));
+		await ctx.stub.putState(batchId, this.o2b(batchParsed));
 		console.info('============= Product Added Successfuly ! ===========');
 		// fire event
 		this.setEvent(ctx, 'product-added', JSON.stringify(batchParsed));
@@ -256,7 +256,7 @@ class SupplyChainContract extends Contract {
 
       }
 
-    /*
+    /**
      * Creats a new Batch and adds it to the ledger
      * 
      * 
@@ -282,7 +282,7 @@ class SupplyChainContract extends Contract {
     }
 
 
- 	/*
+ 	/**
  	 * @returns list of all organization in network
  	 */
 	getRegisteredOrgs() {
@@ -305,7 +305,7 @@ class SupplyChainContract extends Contract {
         return from;	
 	}
 
- 	/* 
+ 	/** 
  	 * Records sending of batch
  	 * It is an example of a malicious 
 	 * function 
@@ -336,13 +336,13 @@ class SupplyChainContract extends Contract {
 		return "Batch sent";
     }
 
-	/* 
+	/** 
  	 * Records sending of batch
  	 * 
- 	 * @param ctx Ledger Context
+ 	 * @param  ctx Ledger Context
  	 * @return Transaction
  	 */
-	 async sendBatch(ctx, from, to, batchid, cost, dd) {
+	async sendBatch(ctx, from, to, batchid, cost, dd) {
 
     	// check if batch exists
 	    const batch = await ctx.stub.getState(batchid); 
@@ -465,10 +465,10 @@ class SupplyChainContract extends Contract {
 	/**
 	 * update sender signature in transaction
 	 * with the public key of sender
-	 * @param {*} ctx transaction contecxt
-	 * @param {*} trxid  transaction id
-	 * @param {*} batchid  batch id
-	 * @param {*} sendersignature  public key of sender
+	 * @param ctx transaction contecxt
+	 * @param trxid  transaction id
+	 * @param batchid  batch id
+	 * @param sendersignature  public key of sender
 	 */
 	async updateSenderSignature(ctx, trxid, batchid,sendersignature) {
 
@@ -507,46 +507,45 @@ class SupplyChainContract extends Contract {
 	/**
 	 * update sender signature in transaction
 	 * with the public key of sender
-	 * @param {*} ctx transaction contecxt
-	 * @param {*} trxid  transaction id
-	 * @param {*} batchid  batch id
-	 * @param {*} sendersignature  public key of sender
+	 * @param ctx transaction contecxt
+	 * @param trxid  transaction id
+	 * @param batchid  batch id
+	 * @param sendersignature  public key of sender
 	 */
-		 async updateSenderSignature(ctx, trxid, batchid,recieversignature) {
-
-			console.log("============= Updating reciever signature ============== ");
+	async updateRecieverSignature(ctx, trxid, batchid,recieversignature) {
+		console.log("============= Updating reciever signature ============== ");
+	
+		var trxs = await this.getTransactions(ctx);
 		
-			var trxs = await this.getTransactions(ctx);
-			
-			for(var i = 0; i < trxs.length; i++) {
-				// as we need only record, not key
-				var trx = trxs[i].Record;
-				console.log("TRX", trx);
-				if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
-					console.info("Got transaction ", trxs[i]);
-					
-					// change batch's owner
-					const batch = await ctx.stub.getState(batchid);
-					const batchParsed = JSON.parse(batch.toString());
-					// add current owner to previous owner
-					batchParsed.previousOwners.push(batchParsed.owner);
-					// make receiever the new owner of batch
-					batchParsed.recieverSignature = recieversignature;
+		for(var i = 0; i < trxs.length; i++) {
+			// as we need only record, not key
+			var trx = trxs[i].Record;
+			console.log("TRX", trx);
+			if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
+				console.info("Got transaction ", trxs[i]);
+				
+				// change batch's owner
+				const batch = await ctx.stub.getState(batchid);
+				const batchParsed = JSON.parse(batch.toString());
+				// add current owner to previous owner
+				batchParsed.previousOwners.push(batchParsed.owner);
+				// make receiever the new owner of batch
+				batchParsed.recieverSignature = recieversignature;
 
-					// save updated batch and transactions
-					ctx.stub.putState(trx.trxid, this.o2b(trx));
-					ctx.stub.putState(batchParsed.batchId, this.o2b(batchParsed));
-					console.info('============= Recieved Batch ===========');
-					
-					// fire event
-					this.setEvent(ctx, 'reciever-signed', JSON.stringify(trx));
+				// save updated batch and transactions
+				ctx.stub.putState(trx.trxid, this.o2b(trx));
+				ctx.stub.putState(batchParsed.batchId, this.o2b(batchParsed));
+				console.info('============= Recieved Batch ===========');
+				
+				// fire event
+				this.setEvent(ctx, 'reciever-signed', JSON.stringify(trx));
 
-					return `Updated TRX : ${JSON.stringify(trxs)} \n Updated Batch ${JSON.stringify(batchParsed)}`;
-				}
+				return `Updated TRX : ${JSON.stringify(trxs)} \n Updated Batch ${JSON.stringify(batchParsed)}`;
 			}
-			// if we are hebre, it means that we didnt found the transactions
-			throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've been sent a batch !!`);
 		}
+		// if we are hebre, it means that we didnt found the transactions
+		throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've been sent a batch !!`);
+	}
 }
 
 module.exports = SupplyChainContract;
