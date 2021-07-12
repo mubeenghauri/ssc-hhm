@@ -10,11 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^4.17.1",
     "fabric-ca-client": "^2.2.7",
     "fabric-network": "^2.2.7",
+    "helmet": "^4.6.0",
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.7"
   }
 }
