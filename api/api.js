@@ -1,16 +1,20 @@
-
 /**
+ * REST Api for serving peers 
+ * using HLF (Hyperledger Fabric)
  * 
- * 
- * 
+ * @author SSC-HHM
  */
-
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const helmet = require('helmet');
 const express = require('express');
-const api = express();
 const crypto = require('crypto');
 const cors = require('cors');
-const port = 8001;
+const api = express();
+
 const fabricHelper = require('./utils/fabric-helper');
+
+const port = 8001;
 
 // importing routes
 const manufacturerRoutes = require('./routes/manufacture-routes');
@@ -20,6 +24,9 @@ const manufacturerRoutes = require('./routes/manufacture-routes');
 
 api.use(express.json());
 api.use(cors());
+api.use(helmet());
+api.use(morgan('tiny'));
+
 
 api.use('/manufacturer', manufacturerRoutes);
 // api.use('/supplier', supplierRoutes);
