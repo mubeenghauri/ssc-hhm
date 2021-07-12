@@ -3,6 +3,7 @@ const router = express.Router();
 const fabricHelper = require('../utils/fabric-helper');
 const auth = require('../utils/auth');
 
+const THIS_ORG = 'Manufacturer'
 
 const clog = str => {
     console.log(`[manufacturer-router] ${str}`);
@@ -14,59 +15,155 @@ router.route('/').get( (req, res) => {
     });
 });
 
-router.route('/init-ledger').post( async (req, res) => {
+router.post('/init-ledger', auth, async (req, res) => {
     // just for testing
     let trx = await fabricHelper.submitTrx('initLedger');
-    // .then( trx => {
     res.status(200);
     res.json({'status' : 'success', 'response' : trx});
-    // })
-    // .catch( err => {
-        // res.status(500);
-        // res.json({'status' : 'error', 'error' : err});
-    // });
-
 });
 
-router.route('/batches').get( async (req, res) => {
-    if(  await auth(fabricHelper, req.headers) == false ) {
-        clog(` [WARNING] Unautherized access !!`);
-        res.status(404);
-        res.json({'error' : 'Unautherized Access !!'});
-        return;
-    }
-    // console.log(req.headers);
+router.get('/batches', auth, async (req, res) => {
     // handle route
     clog('Initiating transaction ....');
     let trx = await fabricHelper.submitTrx('getAllBatches');
     clog(`TRX ${ trx}`);
+
     // send response
     res.status(200);
     res.json({'status' : 'success', 'response' : trx});
 });
 
+router.get('/batch/:id', auth, async (req, res) => {
+    let id = req.params.id;
+    let data = {};
+    // handle route
+    clog(`Getting batch of id ${id}`);
 
-// router.get('/batch/:id', (req, res) {
-//     if( ! auth(req.headers) ) {
-//         // send error
-//     }
-    
-//     // handle route
-
-//     // send response
-// });
-
+    let trx = await fabricHelper.submitTrx('getAllBatches');
+    trx = JSON.parse(trx);
+    clog(`Trx : ${trx}`);
+    for(var i = 0; i < trx.length; i++) {
+        if( trx[i].Key == id) {
+            data = trx[i];
+        }
+    }
+    // send response
+    res.status(200);
+    res.json({'status' : 'success', 'response' : data});
+});
 
 // // add a new batch
-// router.post('/batch', (req, res) {
-//     if( ! auth(req.headers) ) {
-//         // send error
-//     }
-    
-//     // handle route
+router.post('/batch', auth, async (req, res) => {
 
-//     // send response
-// });
+    clog(`Adding batch req-body : ${JSON.stringify(req.query)}`);
+    // console.log(req);
+    let bathcid = req.query.batchid;
+    let trx = await fabricHelper.submitTrx('addBatch', bathcid, 'manufacturer');
+    // handle route
+    clog(`TRX: ${trx}`);
+    // send response
+    res.status(200);
+    res.json({'status' : 'success', 'response' : JSON.parse(trx)});
+});
+
+// // add a new item
+router.post('/item', auth, async (req, res) => {
+
+    clog(`Adding item req-body : ${JSON.stringify(req.query)}`);
+    // console.log(req);
+    let bathcid = req.query.batchid;
+    let productid = req.query.productid;
+    let itemname = req.query.itemname;
+
+    fabricHelper.submitTrx('addItem', bathcid, productid, itemname)
+        .catch(error => {
+            res.status(400);
+            res.json({'status' : 'failure', 'error' : error});
+        })
+        .then( trx => {
+            // handle route
+            clog(`TRX: ${trx}`);
+            // send response
+            res.status(200);
+            res.json({'status' : 'success', 'response' : trx != undefined ? JSON.parse(trx) : 'No response from peers'});
+        })
+        ;
+
+});
+
+// // add a new product
+router.post('/product', auth, async (req, res) => {
+
+    clog(`Adding product req-body : ${JSON.stringify(req.query)}`);
+    // console.log(req);
+    let bathcid = req.query.batchid;
+    let productid = req.query.productid;
+
+    fabricHelper.submitTrx('addProduct', bathcid, productid)
+        .catch(error => {
+            res.status(400);
+            res.json({'status' : 'failure', 'error' : error});
+        })
+        .then( trx => {
+            // handle route
+            clog(`TRX: ${trx}`);
+            // send response
+            res.status(200);
+            res.json({'status' : 'success', 'response' : trx != undefined ? JSON.parse(trx) : 'No response from peers'});
+        })
+        ;
+
+});
+
+// // send batch
+router.post('/send-batch', auth, async (req, res) => {
+
+    clog(`Sending batch req-body : ${JSON.stringify(req.query)}`);
+    // console.log(req);
+    let bathcid = req.query.batchid;
+    let cost = req.query.cost;
+    let from = THIS_ORG;
+    let to = req.query.to;
+    let date = new Date();
+    let dd = date.getDate();
+
+    fabricHelper.submitTrx('sendBatch', from, to, bathcid, cost, dd)
+        .catch(error => {
+            res.status(400);
+            res.json({'status' : 'failure', 'error' : error});
+        })
+        .then( trx => {
+            // handle route
+            clog(`TRX: ${trx}`);
+            // send response
+            res.status(200);
+            res.json({'status' : 'success', 'response' : trx != undefined ? JSON.parse(trx) : 'No response from peers'});
+        });
+});
+
+// // recieve batch
+router.post('/recieve-batch', auth, async (req, res) => {
+
+    clog(`Recieve batch req-body : ${JSON.stringify(req.query)}`);
+    // console.log(req);
+    let bathcid = req.query.batchid;
+    let trxid = req.query.trxid;
+    let date = new Date();
+    let dd = date.getDate();
+
+    fabricHelper.submitTrx('recieveBatch', from, to, bathcid, cost, dd)
+        .catch(error => {
+            res.status(400);
+            res.json({'status' : 'failure', 'error' : error});
+        })
+        .then( trx => {
+            // handle route
+            clog(`TRX: ${trx}`);
+            // send response
+            res.status(200);
+            res.json({'status' : 'success', 'response' : trx != undefined ? JSON.parse(trx) : 'No response from peers'});
+        });
+});
 
 // // send batch
 // router.post('/send', (req, res) {
