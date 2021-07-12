@@ -286,7 +286,7 @@ class SupplyChainContract extends Contract {
  	 * @returns list of all organization in network
  	 */
 	getRegisteredOrgs() {
- 		return ['manufacturer', 'supplier', 'retailer'];
+ 		return ['Manufacturer', 'Supplier', 'Retailer'];
 	}
 
 	getInvokerOrg(ctx) {
