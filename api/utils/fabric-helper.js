@@ -148,11 +148,25 @@ const fabric = {
      async submitTrx( trx, ...args) {
         // console.log(conn);
         clog(`Initiating transaction : ${trx} , args : ${args}, contract : ${conn.contract}`);
-        let res = await conn.contract.submitTransaction(trx, ...args);
-    
-        clog(`Contrac res : ${res}`);
+        let response;
+        // try {
+        return conn.contract.submitTransaction(trx, ...args)
+            .catch(error => {
+                let e = error.responses[0].response.message.split(':');
+                e = e[e.length -1];
+                clog(`EEEEROR : ${e}`);
 
-        return res.toString();
+                return Promise.reject(e);
+            })
+            .then( res => {
+                clog(`Contrac res : ${res}`);
+                return Promise.resolve(res.toString());
+            });
+
+        // } catch (error) {
+        //     clog(`ERROR : ${error}`);
+        //     return Promise.reject(error);
+        // }
     },
 
     async enrollAdmin() {
