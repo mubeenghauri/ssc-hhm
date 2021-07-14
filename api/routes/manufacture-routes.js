@@ -165,6 +165,22 @@ router.post('/recieve-batch', auth, async (req, res) => {
         });
 });
 
+router.post('/authenticate', async (req, res) =>  {
+    let user = req.body.username;
+    let pass = req.body.password;
+    console.log(req.body);
+    console.log(user);
+
+
+    let valid = await fabricHelper.userExists(user);
+    res.status(200);
+    clog(`[authenticate] valid = ${valid}`);
+    if(valid == true) {
+        res.json({'auth': 'true'});
+    } else {
+        res.json({'auth': 'false'});
+    }
+});
 // // send batch
 // router.post('/send', (req, res) {
 //     if( ! auth(req.headers) ) {
