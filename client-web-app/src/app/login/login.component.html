@@ -1,0 +1,21 @@
+
+<div class="login-heading mt-4" style="text-align: center;">
+    <h1>Login <span style="color: blueviolet;" > {{  orgname  }} </span> </h1>
+    <div class="example-container">
+        <mat-form-field class="example-full-width"  appearance="fill">
+          <mat-label>Enter your Username</mat-label>
+          <input style="text-align: center;"     matInput placeholder="user1" [formControl]="username" required>
+        </mat-form-field>
+    </div>
+    <div class="example-container">
+        <mat-form-field class="example-full-width"  appearance="fill">
+          <mat-label>Enter your Password</mat-label>
+          <input style="text-align: center;" type="password" matInput placeholder="********" [formControl]="password" required>
+        </mat-form-field>
+    </div>
+
+    <mat-error *ngIf="(authInvalid | async) == true" > invalid creds</mat-error>
+    <div *ngIf="(authValid | async) == true"  style="color: green;">  Valid creds !! </div>
+    <button (click)="login()" mat-raised-button color="primary">Primary</button>
+
+</div>
