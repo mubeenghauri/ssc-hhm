@@ -205,8 +205,12 @@ async function main() {
 			// await contract.submitTransaction('initLedger');
 			// console.log('*** Result: committed');
 
+			console.log('\n--> Submit transaction : add item ')
+    		let result = await contract.submitTransaction('addItem', 'B-003', 'P-003', 'newItemk');
+    		console.log(`*** Result: ${prettyJSONString(result.toString())}`)
+
             console.log('\n--> Evaluate Transaction: GetAllAssets, function returns all the current assets on the ledger');
-			let result = await contract.submitTransaction('getAllBatches');
+			result = await contract.submitTransaction('getAllBatches');
 			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
         }  finally {
 			// Disconnect from the gateway when the application is closing

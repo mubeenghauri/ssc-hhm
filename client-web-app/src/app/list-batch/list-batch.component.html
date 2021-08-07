@@ -1,0 +1,28 @@
+
+<h1> 
+    Available <span class="purple"> Batches</span>
+</h1>
+
+<div class="text-center" id="spinner" >
+  <div  style="margin-left: 50%;">
+    <mat-progress-spinner
+    color="primary"
+    mode="indeterminate"
+    value="100">
+    </mat-progress-spinner>
+  </div>
+</div>
+
+<div id="main">
+  <mat-table  [dataSource]="dataSource" class="mat-elevation-z8 ml-1" style="width: 50%; margin-left: 25%;">
+
+    <ng-container matColumnDef="name">
+      <mat-header-cell mat-header-cell *matHeaderCellDef> Batch Id </mat-header-cell>
+      <mat-cell mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+    </ng-container>
+  
+    <mat-header-row *matHeaderRowDef="displayedColumns"> 
+    </mat-header-row>
+    <mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+</div>

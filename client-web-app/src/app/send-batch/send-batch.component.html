@@ -1,0 +1,56 @@
+
+<h1>Send <span class="purple" > Batch </span> </h1>
+
+<div class="text-center" id="spinner" >
+    <div  style="margin-left: 50%;">
+      <mat-progress-spinner
+      color="primary"
+      mode="indeterminate"
+      value="100">
+      </mat-progress-spinner>
+    </div>
+  </div>
+
+<div id="main">
+    <div class="example-container">
+        <mat-form-field style="width: auto;" class="example-full-width" appearance="fill">
+            <mat-label>Select Batch</mat-label>
+            <mat-select [(ngModel)]="selectedBatch" name='batch'>
+                <mat-option *ngFor="let batch of batches" [value]="batch.name">
+                {{batch.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>          
+    </div>
+    <div class="example-container">
+        <mat-form-field style="width: auto;" appearance="fill">
+            <mat-label>Select Reciever</mat-label>
+            <mat-select [(ngModel)]="selectedReciever" name='reciever'>
+                <mat-option *ngFor="let reciever of recievers" [value]="reciever.name">
+                {{reciever.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>          
+    </div>
+    <div class="example-container" >
+        <mat-form-field class="example-full-width" style="width: 200px;" appearance="fill">
+          <mat-label>Enter cost</mat-label>
+          <input style="text-align: center;" matInput placeholder="" [formControl]="cost" required>
+        </mat-form-field>
+    </div>
+    
+    <div class="example-container">
+        <mat-form-field class="example-full-width" style="width: 200px;" appearance="fill">
+            <mat-label>Choose a date</mat-label>
+            <input matInput [matDatepicker]="picker" [(ngModel)]="departureDate">
+            <mat-datepicker-toggle matSuffix [for]="picker">
+              <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+    </div>
+      
+    <br>
+    <button (click)='send()'  mat-raised-button color="primary">Send</button>
+    
+</div>

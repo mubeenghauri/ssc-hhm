@@ -1,6 +1,6 @@
 
-<div class="login-heading mt-4" style="text-align: center;">
-    <h1>Login <span style="color: blueviolet;" > {{  orgname  }} </span> </h1>
+<!-- <div class="login-heading mt-4" style="text-align: center;"> -->
+    <h1>Login <span class="purple" > {{  orgname  }} </span> </h1>
     <div class="example-container">
         <mat-form-field class="example-full-width"  appearance="fill">
           <mat-label>Enter your Username</mat-label>
@@ -18,4 +18,4 @@
     <div *ngIf="(authValid | async) == true"  style="color: green;">  Valid creds !! </div>
     <button (click)="login()" mat-raised-button color="primary">Primary</button>
 
-</div>
+<!-- </div> -->

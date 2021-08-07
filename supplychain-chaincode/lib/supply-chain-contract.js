@@ -136,7 +136,9 @@ class SupplyChainContract extends Contract {
                 console.log(err);
                 record = strValue;
             }
-            allResults.push({ Key: key, Record: record });
+			if(record.docType == 'batch') {
+				allResults.push({ Key: key, Record: record });
+			}
         }
         console.info("All Batches : ", allResults);
 		// fire event
@@ -251,7 +253,7 @@ class SupplyChainContract extends Contract {
 		await ctx.stub.putState(batchId, this.o2b(batchParsed));
 		console.info('============= Product Added Successfuly ! ===========');
 		// fire event
-		this.setEvent(ctx, 'product-added', JSON.stringify(batchParsed));
+		this.setEvent(ctx, 'product-added', this.o2b(batchParsed));
  	 	return(JSON.stringify(batchParsed));
 
       }
@@ -280,7 +282,6 @@ class SupplyChainContract extends Contract {
 		console.info('============= Batch Created & Added Successfuly ! ===========');
  	 	return(newBatch);
     }
-
 
  	/**
  	 * @returns list of all organization in network
@@ -333,7 +334,7 @@ class SupplyChainContract extends Contract {
 
    		// record transaction
   		const trx = await this.createTransaction(ctx, from, to, cost, batchid, dd, "N/A", `sending batch from: ${from}, to: ${to} with cost ${cost}`);
-		return "Batch sent";
+		return JSON.stringify(trx);
     }
 
 	/** 
@@ -358,9 +359,10 @@ class SupplyChainContract extends Contract {
 
    		// record transaction
   		const trx = await this.createTransaction(ctx, from, to, cost, batchid, dd, "N/A", `sending batch from: ${from}, to: ${to} with cost ${cost}`);
+		console.log('[send-batch] got trx ', trx);
 		// fire event
-		this.setEvent(ctx, 'batch-sent', JSON.stringify(trx));
-		return "Batch sent";
+		this.setEvent(ctx, 'batch-sent', this.o2b(trx));
+		return JSON.stringify(trx);
     }
 
 	async createTransaction(ctx, from, to, cost, batchId, dd, da, desc) {
@@ -390,7 +392,7 @@ class SupplyChainContract extends Contract {
 		console.log(trx);
 		console.info('============= Created Transaction ===========');
 		// fire event
-		this.setEvent(ctx, 'transaction-created', this.o2b(trx));
+		// this.setEvent(ctx, 'transaction-created', this.o2b(trx));
 		return trx;
 	}
 
@@ -446,8 +448,8 @@ class SupplyChainContract extends Contract {
 				batchParsed.uuid = uuid.v5(to, GEN); // change owners's uuid
 				batchParsed.user = sha256(to);       // update user's hash
 		       	// save updated batch and transactions
-		       	ctx.stub.putState(trx.trxid, this.o2b(trx));
-		       	ctx.stub.putState(batchParsed.batchId, this.o2b(batchParsed));
+		       	await ctx.stub.putState(trx.trxId, this.o2b(trx));
+		       	await ctx.stub.putState(batchParsed.batchId, this.o2b(batchParsed));
 				console.info('============= Recieved Batch ===========');
 
 				// fire event
@@ -468,40 +470,43 @@ class SupplyChainContract extends Contract {
 	 * @param ctx transaction contecxt
 	 * @param trxid  transaction id
 	 * @param batchid  batch id
-	 * @param sendersignature  public key of sender
+	 * @param senderSignature  public key of sender
 	 */
-	async updateSenderSignature(ctx, trxid, batchid,sendersignature) {
+	async updateSenderSignature(ctx, trxid, batchid, sendersignature) {
 
 		console.log("============= Updating sender signature ============== ");
 	
-    	var trxs = await this.getTransactions(ctx);
+    	// var trxs = await this.getTransactions(ctx);
 		
-    	for(var i = 0; i < trxs.length; i++) {
-			// as we need only record, not key
-			var trx = trxs[i].Record;
+    	// for(var i = 0; i < trxs.length; i++) {
+		// 	// as we need only record, not key
+		// 	var trx = trxs[i].Record;
+			let trx = await ctx.stub.getState(trxid);
+			trx = JSON.parse(trx.toString());
 			console.log("TRX", trx);
-    		if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
-    			console.info("Got transaction ", trxs[i]);
-    			
-    			// change batch's owner
-    			const batch = await ctx.stub.getState(batchid);
-		       	const batchParsed = JSON.parse(batch.toString());
-		       	// add current owner to previous owner
-		       	batchParsed.previousOwners.push(batchParsed.owner);
-		       	// make receiever the new owner of batch
-		       	batchParsed.senderSignature = sendersignature;
+			console.log(trx.trxId == trxid );
+			console.log(trx.batchId == batchid);
+			console.log(trx.dateArrival == "N/A");
 
+			// if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
+
+				console.info("Got transaction ", trx.trxId);
+    			
+		       	trx.senderSignature = sendersignature;
+				console.info("Changes: ", trx.senderSignature);
+				console.log(trx);
+				console.log(this.o2b(trx));
+	
 		       	// save updated batch and transactions
-		       	ctx.stub.putState(trx.trxid, this.o2b(trx));
-		       	ctx.stub.putState(batchParsed.batchId, this.o2b(batchParsed));
-				console.info('============= Recieved Batch ===========');
+		       	await ctx.stub.putState(trx.trxId, this.o2b(trx));
+				console.info('============= Updated send Batch ===========');
 				// fire event
-				this.setEvent(ctx, 'sender-signed', JSON.stringify(trx));
-		       	return `Updated TRX : ${JSON.stringify(trxs)} \n Updated Batch ${JSON.stringify(batchParsed)}`;
-    		}
-    	}
-    	// if we are here, it means that we didnt found the transactions
-    	throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've sent a batch !!`);
+				// this.setEvent(ctx, 'sender-signed', this.o2b(trx));
+		       	return `Updated TRX : ${JSON.stringify(trx)} \n `;
+    		// }
+    	// }
+    	// if we are here, it means that we didnt found the transacdtions
+    	// throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've sent a batch !!`);
 	}
 
 	/**
@@ -515,36 +520,30 @@ class SupplyChainContract extends Contract {
 	async updateRecieverSignature(ctx, trxid, batchid,recieversignature) {
 		console.log("============= Updating reciever signature ============== ");
 	
-		var trxs = await this.getTransactions(ctx);
-		
-		for(var i = 0; i < trxs.length; i++) {
-			// as we need only record, not key
-			var trx = trxs[i].Record;
-			console.log("TRX", trx);
-			if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
-				console.info("Got transaction ", trxs[i]);
-				
-				// change batch's owner
-				const batch = await ctx.stub.getState(batchid);
-				const batchParsed = JSON.parse(batch.toString());
-				// add current owner to previous owner
-				batchParsed.previousOwners.push(batchParsed.owner);
-				// make receiever the new owner of batch
-				batchParsed.recieverSignature = recieversignature;
+		let trx = await ctx.stub.getState(trxid);
+		trx = JSON.parse(trx.toString());
+		console.log("TRX", trx);
+		console.log(trx.trxId == trxid );
+		console.log(trx.batchId == batchid);
+		console.log(trx.dateArrival == "N/A");
 
-				// save updated batch and transactions
-				ctx.stub.putState(trx.trxid, this.o2b(trx));
-				ctx.stub.putState(batchParsed.batchId, this.o2b(batchParsed));
-				console.info('============= Recieved Batch ===========');
-				
-				// fire event
-				this.setEvent(ctx, 'reciever-signed', JSON.stringify(trx));
+		// if(trx.trxId == trxid && trx.batchId == batchid && trx.dateArrival == "N/A") {
 
-				return `Updated TRX : ${JSON.stringify(trxs)} \n Updated Batch ${JSON.stringify(batchParsed)}`;
-			}
-		}
+			console.info("Got transaction ", trx.trxId);
+			
+			   trx.recieverSignature = recieversignature;
+			console.info("Changes: ", trx.recieverSignature);
+			console.log(trx);
+			console.log(this.o2b(trx));
+
+			   // save updated batch and transactions
+			   await ctx.stub.putState(trx.trxId, this.o2b(trx));
+			console.info('============= Updated send Batch ===========');
+			// fire event
+			// this.setEvent(ctx, 'sender-signed', this.o2b(trx));
+			   return `Updated TRX : ${JSON.stringify(trx)} \n `;
 		// if we are hebre, it means that we didnt found the transactions
-		throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've been sent a batch !!`);
+		// throw new Error(`[ERROR] TRX with id ${trxid}, batchid ${batchid} not found, please make sure u've been sent a batch !!`);
 	}
 }
 

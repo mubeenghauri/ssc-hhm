@@ -1,0 +1,22 @@
+
+
+<h1> Welcome <span style="color: blueviolet;"> {{ orgname }}</span> </h1> 
+
+<div class="row mt-4">
+    
+    <mat-grid-list cols="{{ actions.length }}" rowHeight="5:1">
+        <mat-grid-tile *ngFor="let a of actions">
+            <button (click)="navigate(a.url)"  mat-button>             
+                <mat-card style=" color:white; background-color:blueviolet; max-width: 300px; width: 190px; font-weight: 600; font-size: large;  " > 
+                    <mat-icon aria-hidden="false" aria-label="Example home icon">{{ a.icon }}</mat-icon>
+                    <mat-card-actions> 
+                        {{ a.action }} 
+                    </mat-card-actions>
+                </mat-card>
+            </button>
+        </mat-grid-tile>
+
+    </mat-grid-list>
+
+      
+</div>

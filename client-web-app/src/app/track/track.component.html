@@ -1,0 +1,10 @@
+
+
+<h1> Track <span class="purple">Batch</span> </h1>
+<div class="example-container">
+    <mat-form-field class="example-full-width"  appearance="fill">
+        <mat-label>Enter Batch ID</mat-label>
+        <input style="text-align: center;"     matInput placeholder="Batch Id goes here" [formControl]="batchid" required>
+    </mat-form-field>
+</div>
+<button (click)="track()" mat-raised-button color="primary">Add</button>

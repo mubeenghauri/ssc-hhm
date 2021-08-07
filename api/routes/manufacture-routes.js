@@ -15,8 +15,10 @@ router.route('/').get( (req, res) => {
     });
 });
 
-router.post('/init-ledger', auth, async (req, res) => {
+router.post('/init-ledger', async (req, res) => {
     // just for testing
+    fabricHelper.changeContext(THIS_ORG);
+
     let trx = await fabricHelper.submitTrx('initLedger');
     res.status(200);
     res.json({'status' : 'success', 'response' : trx});
@@ -24,13 +26,27 @@ router.post('/init-ledger', auth, async (req, res) => {
 
 router.get('/batches', auth, async (req, res) => {
     // handle route
+    fabricHelper.changeContext(THIS_ORG);
+
     clog('Initiating transaction ....');
     let trx = await fabricHelper.submitTrx('getAllBatches');
     clog(`TRX ${ trx}`);
 
     // send response
     res.status(200);
-    res.json({'status' : 'success', 'response' : trx});
+    res.json({'status' : 'success', 'response' : JSON.parse(trx)});
+});
+
+router.get('/transactions', auth, async (req, res) => {
+    // handle route
+    fabricHelper.changeContext(THIS_ORG);
+
+    let trx = await fabricHelper.submitTrx('getTransactions');
+    clog(`TRX ${ trx}`);
+
+    // send response
+    res.status(200);
+    res.json({'status' : 'success', 'response' : JSON.parse(trx)});
 });
 
 router.get('/batch/:id', auth, async (req, res) => {
@@ -54,11 +70,12 @@ router.get('/batch/:id', auth, async (req, res) => {
 
 // // add a new batch
 router.post('/batch', auth, async (req, res) => {
+    fabricHelper.changeContext(THIS_ORG);
 
     clog(`Adding batch req-body : ${JSON.stringify(req.query)}`);
     // console.log(req);
-    let bathcid = req.query.batchid;
-    let trx = await fabricHelper.submitTrx('addBatch', bathcid, 'manufacturer');
+    let bathcid = req.body.batchid;
+    let trx = await fabricHelper.submitTrx('addBatch', bathcid, 'Manufacturer');
     // handle route
     clog(`TRX: ${trx}`);
     // send response
@@ -70,6 +87,8 @@ router.post('/batch', auth, async (req, res) => {
 router.post('/item', auth, async (req, res) => {
 
     clog(`Adding item req-body : ${JSON.stringify(req.query)}`);
+    fabricHelper.changeContext(THIS_ORG);
+
     // console.log(req);
     let bathcid = req.query.batchid;
     let productid = req.query.productid;
@@ -95,6 +114,8 @@ router.post('/item', auth, async (req, res) => {
 router.post('/product', auth, async (req, res) => {
 
     clog(`Adding product req-body : ${JSON.stringify(req.query)}`);
+    fabricHelper.changeContext(THIS_ORG);
+
     // console.log(req);
     let bathcid = req.query.batchid;
     let productid = req.query.productid;
@@ -117,15 +138,17 @@ router.post('/product', auth, async (req, res) => {
 
 // // send batch
 router.post('/send-batch', auth, async (req, res) => {
+    fabricHelper.changeContext(THIS_ORG);
 
-    clog(`Sending batch req-body : ${JSON.stringify(req.query)}`);
+    clog(`Sending batch req-body : ${JSON.stringify(req.body)}`);
     // console.log(req);
-    let bathcid = req.query.batchid;
-    let cost = req.query.cost;
+
+    let bathcid = req.body.batchid;
+    let cost = req.body.cost;
     let from = THIS_ORG;
-    let to = req.query.to;
-    let date = new Date();
-    let dd = date.getDate();
+    let to = req.body.reciever;
+    // let date = new Date();
+    let dd = req.body.departureDate;
 
     fabricHelper.submitTrx('sendBatch', from, to, bathcid, cost, dd)
         .catch(error => {
@@ -141,31 +164,9 @@ router.post('/send-batch', auth, async (req, res) => {
         });
 });
 
-// // recieve batch
-router.post('/recieve-batch', auth, async (req, res) => {
-
-    clog(`Recieve batch req-body : ${JSON.stringify(req.query)}`);
-    // console.log(req);
-    let bathcid = req.query.batchid;
-    let trxid = req.query.trxid;
-    let date = new Date();
-    let dd = date.getDate();
-
-    fabricHelper.submitTrx('recieveBatch', from, to, bathcid, cost, dd)
-        .catch(error => {
-            res.status(400);
-            res.json({'status' : 'failure', 'error' : error});
-        })
-        .then( trx => {
-            // handle route
-            clog(`TRX: ${trx}`);
-            // send response
-            res.status(200);
-            res.json({'status' : 'success', 'response' : trx != undefined ? JSON.parse(trx) : 'No response from peers'});
-        });
-});
-
 router.post('/authenticate', async (req, res) =>  {
+    fabricHelper.changeContext(THIS_ORG);
+
     let user = req.body.username;
     let pass = req.body.password;
     console.log(req.body);
@@ -181,26 +182,29 @@ router.post('/authenticate', async (req, res) =>  {
         res.json({'auth': 'false'});
     }
 });
-// // send batch
-// router.post('/send', (req, res) {
-//     if( ! auth(req.headers) ) {
-//         // send error
-//     }
-    
-//     // handle route
 
-//     // send response
-// });
 
-// // mark batch as sent
-// router.post('/verify-sent', (req, res) {
-//     if( ! auth(req.headers) ) {
-//         // send error
-//     }
-    
-//     // handle route
+// mark batch as sent
+router.post('/verify-sent',  (req, res) => {
+    fabricHelper.changeContext(THIS_ORG);
+   
+    let trxid = req.body.trxid;
+    let batchid = req.body.batchid;
+    let sign = req.body.sign;
 
-//     // send response
-// });
+    fabricHelper.submitTrx('updateSenderSignature', trxid, batchid, sign)
+        .catch( error => {
+            res.status(404);
+            res.json({'status' : 'failure', 'error' : error});
+        })
+        .then( trx => {
+            // handle route
+            clog(`TRX: ${trx}`);
+            // send response
+            res.status(200);
+            res.json({'status' : 'success', 'response' : trx != undefined ? JSON.stringify(trx) : 'No response from peers'});
+        });
+});
+
 
 module.exports = router;

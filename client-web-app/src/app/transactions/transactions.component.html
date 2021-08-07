@@ -1,0 +1,59 @@
+<h1> 
+    Transactions <span class="purple">  {{ ORGNAME }}</span>
+</h1>
+
+<div class="text-center" id="spinner" >
+    <div  style="margin-left: 50%;">
+      <mat-progress-spinner
+      color="primary"
+      mode="indeterminate"
+      value="100">
+      </mat-progress-spinner>
+    </div>
+  </div>
+
+<div id="main">
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z8 ml-1" style="width: 80%; margin-left: 8%;" >
+
+        <ng-container matColumnDef="id">
+          <mat-header-cell mat-header-cell *matHeaderCellDef>  Transaction Id </mat-header-cell>
+          <mat-cell mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="batch">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Batch Id </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.batch}} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="from">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  From </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.from}} </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="to">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  To </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.to}} </mat-cell>
+        </ng-container>
+          
+        <ng-container matColumnDef="sent">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Sent </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.sent}} </mat-cell>
+        </ng-container>
+    
+        <ng-container matColumnDef="sentVerified">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Verified Sent </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.sentVerified}} </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="recieved">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Recieved </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.recieved}} </mat-cell>
+        </ng-container>
+          
+          
+      
+        <mat-header-row *matHeaderRowDef="displayedColumns"> 
+        </mat-header-row>
+        <mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>    
+</div>

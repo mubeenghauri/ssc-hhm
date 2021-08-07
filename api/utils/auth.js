@@ -23,11 +23,13 @@ const auth = async (req, res, next) => {
     let authheader = req.headers.authorization;
     clog(`Got token ${authheader}`);
     let userid = Buffer.from(authheader, 'base64').toString('utf-8').split(':')[0];
+    let pass = Buffer.from(authheader, 'base64').toString('utf-8').split(':')[1];
+
     clog(`Extracted userid : ${userid}`);
     let status = await fabricconn.userExists(userid);
     clog(`Auth status : ${status}`);
     
-    if( status == false ) {
+    if( status == undefined  ) {
         // send error response
         clog(` [WARNING] Unautherized access !!`);
         res.status(404);

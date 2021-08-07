@@ -18,8 +18,8 @@ const port = 8001;
 
 // importing routes
 const manufacturerRoutes = require('./routes/manufacture-routes');
-// const supplierRoutes = require('./routes/supplier-routes');
-// const retailerRoutes = require('./routes/retialer-routes');
+const supplierRoutes = require('./routes/supplier-routes');
+const retailerRoutes = require('./routes/retailer-routes');
 
 
 api.use(express.json());
@@ -29,8 +29,8 @@ api.use(morgan('tiny'));
 
 
 api.use('/manufacturer', manufacturerRoutes);
-// api.use('/supplier', supplierRoutes);
-// api.use('/retailer', retailerRoutes);
+api.use('/supplier', supplierRoutes);
+api.use('/retailer', retailerRoutes);
 
 api.get('/', (req, res) => {
     res.json({"status":"okay"});
@@ -40,7 +40,7 @@ api.get('/', (req, res) => {
     try {
         await fabricHelper.initConn();
         await fabricHelper.eventListener();
-        api.listen(port, (error) => {
+        api.listen(port, '0.0.0.0', (error) => {
             if (error) {
                 return console.log('Error: ' + err);
             }
@@ -51,6 +51,3 @@ api.get('/', (req, res) => {
         console.log("[API] Failed starting api ", err);
     }
 })();
-
-
-

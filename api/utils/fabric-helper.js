@@ -10,15 +10,18 @@ const e = require('express');
  * TODO: add these in a config file maybe?
  */
 // path to config file.
-const CCP_PATH    = path.resolve(__dirname, '..', '..', 'organizations', 'peerOrganizations', 'manufacturer.ssc-hhm.com', 'connection-manufacturer.json');
-const WALLET_PATH = path.join(__dirname, 'wallet');
-const CA_HOST = 'ca.manufacturer.ssc-hhm.com';
-const ORG_ADMIN = "manufactureradmin";
-const ORG_ADMIN_PASS = 'manufactureradminpw';
-const USER_ID = 'user2';
-const USER_AFFL = 'manufacturer.desktop-client';
-const CHANNEL = 'sc';
-const CHAINCODENAME = 'supplychain';
+var ORG_CONTEXT = "Manufacturer";
+var CCP_PATH    = path.resolve(__dirname, '..', '..', 'organizations', 'peerOrganizations', 'manufacturer.ssc-hhm.com', 'connection-manufacturer.json');
+var WALLET_PATH = path.join(__dirname, 'wallet');
+var CA_HOST = 'ca.manufacturer.ssc-hhm.com';
+var ORG_ADMIN = "manufactureradmin";
+var ORG_ADMIN_PASS = 'manufactureradminpw';
+var USER_ID = 'MUser';
+var USER_AFFL = 'manufacturer.desktop-client';
+var CHANNEL = 'sc';
+var CHAINCODENAME = 'supplychain';
+
+
 
 const clog = (str) => {
     console.log(`[fabric-helper] ${str}`);
@@ -27,8 +30,6 @@ const clog = (str) => {
 // Connection object to hold
 // necessary data
 const conn = {
-    ccppath : null,
-    uid : null,
     msp : null,
     contract : null,
     caclient: null,
@@ -40,7 +41,62 @@ const conn = {
 // fabric helper class
 const fabric = {
 
+    changeContext(org) {
+        clog(`Changing context to ${JSON.stringify( org)}`);
+        switch (org) {
+            case 'Manufacturer':
+                if (ORG_CONTEXT != org) {
+                    ORG_CONTEXT = org;
+                    CCP_PATH    = path.resolve(__dirname, '..', '..', 'organizations', 'peerOrganizations', 'manufacturer.ssc-hhm.com', 'connection-manufacturer.json');
+                    WALLET_PATH = path.join(__dirname, 'wallet');
+                    CA_HOST = 'ca.manufacturer.ssc-hhm.com';
+                    ORG_ADMIN = "manufactureradmin";
+                    ORG_ADMIN_PASS = 'manufactureradminpw';
+                    USER_ID = "MUser";
+                    USER_AFFL = 'manufacturer.desktop-client';
 
+                    this.initConn();
+                } else {
+                    clog(`Already in the same context, not changing!!`);
+                }
+                
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 'Supplier':
+                if (ORG_CONTEXT != org) {
+                    clog("Using supplier config...");
+                    ORG_CONTEXT = org;
+                    CCP_PATH    = path.resolve(__dirname, '..', '..', 'organizations', 'peerOrganizations', 'supplier.ssc-hhm.com', 'connection-supplier.json');
+                    WALLET_PATH = path.join(__dirname, 'supplier-wallet');
+                    CA_HOST = 'ca.supplier.ssc-hhm.com';
+                    ORG_ADMIN = "supplieradmin";
+                    ORG_ADMIN_PASS = 'supplieradminpw';
+                    USER_ID = 'SUser';
+                    USER_AFFL = 'supplier.desktop-client';
+                    
+                    this.initConn();
+                } else {
+                    clog(`Already in the same context, not changing!!`);
+                }    
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            case 'Retailer':
+                if (ORG_CONTEXT != org) {
+                    clog("Using retialer config...");
+                    ORG_CONTEXT = org;
+                    CCP_PATH    = path.resolve(__dirname, '..', '..', 'organizations', 'peerOrganizations', 'retailer.ssc-hhm.com', 'connection-retailer.json');
+                    WALLET_PATH = path.join(__dirname, 'retailer-wallet');
+                    CA_HOST = 'ca.retailer.ssc-hhm.com';
+                    ORG_ADMIN = "retaileradmin";
+                    ORG_ADMIN_PASS = 'retaileradminpw';
+                    USER_ID = 'RUser';
+                    USER_AFFL = 'retailer.desktop-client';
+                    
+                    this.initConn();
+                } else {
+                    clog(`Already in the same context, not changing!!`);
+                }                
+        }
+    },
+ 
     getCCP() {
         clog('Reading CCP file');
         return JSON.parse(fs.readFileSync(CCP_PATH, 'utf-8'));
@@ -162,11 +218,6 @@ const fabric = {
                 clog(`Contrac res : ${res}`);
                 return Promise.resolve(res.toString());
             });
-
-        // } catch (error) {
-        //     clog(`ERROR : ${error}`);
-        //     return Promise.reject(error);
-        // }
     },
 
     async enrollAdmin() {
@@ -207,14 +258,14 @@ const fabric = {
         }
     },
 
-    async registerAndEnrollUser(caClient=conn.caclient, 
-                                    wallet=conn.wallet,
-                                    orgMspId=conn.msp, 
-                                    userId=USER_ID, 
-                                    affiliation=USER_AFFL) {
+    async registerAndEnrollUser(userId=USER_ID, affiliation=USER_AFFL) {
 
-        clog(`Registering and Enrolling user : ${userId}, msp : ${orgMspId} ...`);
         const adminUserId = ORG_ADMIN;
+        const caClient = conn.caclient; 
+        const wallet = conn.wallet;
+        const orgMspId = conn.msp;
+        clog(`Registering and Enrolling user : ${userId}, msp : ${orgMspId} ...`);
+
         // const affiliation = USER_AFFL;
         // const userId = USER_ID;
         try {
@@ -258,6 +309,7 @@ const fabric = {
                 credentials: {
                     certificate: enrollment.certificate,
                     privateKey: enrollment.key.toBytes(),
+                    password: secret,
                 },
                 mspId: orgMspId,
                 type: 'X.509',
@@ -299,6 +351,7 @@ const fabric = {
      */
     async userExists(user) {
         let res = await conn.wallet.get(user);
+        console.log(res);
         if(res) return true;
         return false;
     },

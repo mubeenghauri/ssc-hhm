@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-// import {FormControl} from "@angular/forms";
+import { Router } from '@angular/router';
 import {FormControl, Validators} from '@angular/forms';
 import { Subject } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -11,13 +12,13 @@ import { AuthService } from '../services/auth.service';
 })
 export class LoginComponent implements OnInit {
 
-  orgname = 'Manufacturer';
+  orgname = environment.orgName;
   authInvalid: Subject<boolean> = new Subject();
   authValid: Subject<boolean> = new Subject();
   username = new FormControl('', Validators.required);
   password = new FormControl('', Validators.required);
 
-  constructor(private auth: AuthService) { 
+  constructor(private auth: AuthService, private router: Router) { 
     this.authInvalid.next(true);
     this.authValid.next(false);
   }
@@ -36,17 +37,20 @@ export class LoginComponent implements OnInit {
     this.auth.authenticate(user, pass) 
     .subscribe( resp  => {
       // catchError(this.handleError);
-      console.log((resp as any).auth);
+      console.log(typeof (resp as any).auth);
       let res = (resp as any).auth;
-      if(res == false) {
+      if(res === 'false') {
         this.authInvalid.next(true);
         this.authValid.next(false);
       }
       else {
-        this.authInvalid.next(false);
-        this.authValid.next(true);
+        // if login successful, 
+        // login to dash
+        localStorage.setItem('username', user);
+        localStorage.setItem('password', pass);
+        localStorage.setItem('authstring', user+":"+pass);
+        this.router.navigateByUrl('/dashboard');
       }   
-      return res;
     });
   }
 }

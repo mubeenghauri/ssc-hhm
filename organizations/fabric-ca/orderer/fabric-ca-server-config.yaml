@@ -1,40 +1,3 @@
-#############################################################################
-#   This is a configuration file for the fabric-ca-server command.
-#
-#   COMMAND LINE ARGUMENTS AND ENVIRONMENT VARIABLES
-#   ------------------------------------------------
-#   Each configuration element can be overridden via command line
-#   arguments or environment variables.  The precedence for determining
-#   the value of each element is as follows:
-#   1) command line argument
-#      Examples:
-#      a) --port 443
-#         To set the listening port
-#      b) --ca.keyfile ../mykey.pem
-#         To set the "keyfile" element in the "ca" section below;
-#         note the '.' separator character.
-#   2) environment variable
-#      Examples:
-#      a) FABRIC_CA_SERVER_PORT=443
-#         To set the listening port
-#      b) FABRIC_CA_SERVER_CA_KEYFILE="../mykey.pem"
-#         To set the "keyfile" element in the "ca" section below;
-#         note the '_' separator character.
-#   3) configuration file
-#   4) default value (if there is one)
-#      All default values are shown beside each element below.
-#
-#   FILE NAME ELEMENTS
-#   ------------------
-#   The value of all fields whose name ends with "file" or "files" are
-#   name or names of other files.
-#   For example, see "tls.certfile" and "tls.clientauth.certfiles".
-#   The value of each of these fields can be a simple filename, a
-#   relative path, or an absolute path.  If the value is not an
-#   absolute path, it is interpretted as being relative to the location
-#   of this configuration file.
-#
-#############################################################################
 
 # Version of config file
 version: 1.4.6
@@ -222,26 +185,6 @@ ldap:
             - name:
               value:
 
-#############################################################################
-# Affiliations section. Fabric CA server can be bootstrapped with the
-# affiliations specified in this section. Affiliations are specified as maps.
-# For example:
-#   businessunit1:
-#     department1:
-#       - team1
-#   businessunit2:
-#     - department2
-#     - department3
-#
-# Affiliations are hierarchical in nature. In the above example,
-# department1 (used as businessunit1.department1) is the child of businessunit1.
-# team1 (used as businessunit1.department1.team1) is the child of department1.
-# department2 (used as businessunit2.department2) and department3 (businessunit2.department3)
-# are children of businessunit2.
-# Note: Affiliations are case sensitive except for the non-leaf affiliations
-# (like businessunit1, department1, businessunit2) that are specified in the configuration file,
-# which are always stored in lower case.
-#############################################################################
 affiliations:
   manufacturer:
     - desktop-client
@@ -253,22 +196,6 @@ affiliations:
     - desktop-client
     - mobile-client
 
-#############################################################################
-#  Signing section
-#
-#  The "default" subsection is used to sign enrollment certificates;
-#  the default expiration ("expiry" field) is "8760h", which is 1 year in hours.
-#
-#  The "ca" profile subsection is used to sign intermediate CA certificates;
-#  the default expiration ("expiry" field) is "43800h" which is 5 years in hours.
-#  Note that "isca" is true, meaning that it issues a CA certificate.
-#  A maxpathlen of 0 means that the intermediate CA cannot issue other
-#  intermediate CA certificates, though it can still issue end entity certificates.
-#  (See RFC 5280, section 4.2.1.9)
-#
-#  The "tls" profile subsection is used to sign TLS certificate requests;
-#  the default expiration ("expiry" field) is "8760h", which is 1 year in hours.
-#############################################################################
 signing:
     default:
       usage:
@@ -292,38 +219,22 @@ signing:
             - key agreement
          expiry: 8760h
 
-###########################################################################
-#  Certificate Signing Request (CSR) section.
-#  This controls the creation of the root CA certificate.
-#  The expiration for the root CA certificate is configured with the
-#  "ca.expiry" field below, whose default value is "131400h" which is
-#  15 years in hours.
-#  The pathlength field is used to limit CA certificate hierarchy as described
-#  in section 4.2.1.9 of RFC 5280.
-#  Examples:
-#  1) No pathlength value means no limit is requested.
-#  2) pathlength == 1 means a limit of 1 is requested which is the default for
-#     a root CA.  This means the root CA can issue intermediate CA certificates,
-#     but these intermediate CAs may not in turn issue other CA certificates
-#     though they can still issue end entity certificates.
-#  3) pathlength == 0 means a limit of 0 is requested;
-#     this is the default for an intermediate CA, which means it can not issue
-#     CA certificates though it can still issue end entity certificates.
-###########################################################################
+
 csr:
    cn: fabric-ca-server
    keyrequest:
      algo: ecdsa
      size: 256
    names:
-      - C: US
-        ST: "North Carolina"
+      - C: PK
+        ST: "Punjab"
         L:
-        O: Hyperledger
-        OU: Fabric
+        O: SSC
+        OU: SSC-HHM
    hosts:
      - 196d90e77673
      - localhost
+     - ordere.ssc-hhm.com
    ca:
       expiry: 131400h
       pathlength: 1

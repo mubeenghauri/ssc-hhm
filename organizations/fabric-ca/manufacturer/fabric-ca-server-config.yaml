@@ -311,19 +311,20 @@ signing:
 #     CA certificates though it can still issue end entity certificates.
 ###########################################################################
 csr:
-   cn: fabric-ca-server
+   cn: fabric-ca-server-manufacturer
    keyrequest:
      algo: ecdsa
      size: 256
    names:
-      - C: US
-        ST: "North Carolina"
+      - C: PK
+        ST: "KPK"
         L:
         O: Hyperledger
         OU: Fabric
    hosts:
      - 74ee47ff9df7
      - localhost
+     - manufacturer.ssc-hhm.com
    ca:
       expiry: 131400h
       pathlength: 1

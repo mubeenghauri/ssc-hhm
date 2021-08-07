@@ -1,0 +1,70 @@
+<h1> 
+    Recieve <span class="purple">  Batch ( {{ ORGNAME }} )</span>
+</h1>
+
+<div class="text-center" id="spinner" >
+    <div  style="margin-left: 50%;">
+      <mat-progress-spinner
+      color="primary"
+      mode="indeterminate"
+      value="100">
+      </mat-progress-spinner>
+    </div>
+  </div>
+
+<div id="main">
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z8 ml-1" style="width: 80%; margin-left: 8%;" >
+
+        <ng-container matColumnDef="id">
+          <mat-header-cell mat-header-cell *matHeaderCellDef>  Transaction Id </mat-header-cell>
+          <mat-cell mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="batch">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Batch Id </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.batch}} </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="from">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  From </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.from}} </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="to">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  To </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.to}} </mat-cell>
+        </ng-container>
+          
+        <ng-container matColumnDef="sent">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Sent </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.sent}} </mat-cell>
+        </ng-container>
+    
+        <ng-container matColumnDef="sentVerified">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Verified Sent </mat-header-cell>
+            <mat-cell mat-cell *matCellDef="let element"> {{element.sentVerified}} </mat-cell>
+        </ng-container>
+        
+        <ng-container matColumnDef="recieved">
+            <mat-header-cell mat-header-cell *matHeaderCellDef>  Recieved </mat-header-cell>
+                <mat-cell mat-cell *matCellDef="let element" > 
+                    <ng-container *ngIf="element.sentVerified && !element.recieved ">
+                        <button  (click)="openDialog(element)" mat-raised-button color="primary">Recieve</button>                
+                    </ng-container>
+                    <ng-container *ngIf="!element.sentVerified">
+                        <button   disabled mat-raised-button color="primary">Not Sent</button>                
+                    </ng-container>
+                    <ng-container *ngIf=" element.sentVerified  && !element.recievedVerified ">
+                        <button  disabled  mat-raised-button color="primary">Verify Recieved</button>                
+                    </ng-container>
+                    <ng-container *ngIf=" element.sentVerified  && element.recievedVerified ">
+                        <button  disabled  mat-raised-button color="secondary">Recieved</button>                
+                    </ng-container>
+                </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"> 
+        </mat-header-row>
+        <mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>    
+</div>

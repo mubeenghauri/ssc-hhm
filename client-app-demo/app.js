@@ -20,7 +20,7 @@ const channelName = 'sc';
 const chaincodeName = 'supplychain';
 const mspManufacturer = 'ManufacturerMSP';
 const walletPath = path.join(__dirname, 'wallet');
-const userId = 'user4';
+const userId = 'user6';
 const adminUserId = 'manufactureradmin';
 const adminUserPass = 'manufactureradminpw';
 
@@ -220,6 +220,10 @@ async function main() {
 			result = await contract.evaluateTransaction('getAllBatches');
 			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
 
+
+            console.log('\n--> submit Transaction: send batch');
+    		result = await contract.submitTransaction('sendBatch', 'Manufacturer', 'Supplier', 'B-002', '2000', '2011-19-23');
+			console.log(`*** Result: ${prettyJSONString(result.toString())}`);
         }  finally {
 			// Disconnect from the gateway when the application is closing
 			// This will close all connections to the network
